@@ -28,7 +28,6 @@ public class LexAn extends Phase {
 	public LexAn() {
 		super("lexan");
 		srcFileName = compiler.Main.cmdLineArgValue("--src-file-name");
-		System.out.println(srcFileName);
 		try {
 			srcFile = new BufferedReader(new FileReader(srcFileName));
 		} catch (IOException ___) {
@@ -59,8 +58,10 @@ public class LexAn extends Phase {
 	 */
 	public Symbol lexer() {
 		Symbol symb = lexify();
-		if (symb.token != Symbol.Term.EOF)
+		if (symb.token != Symbol.Term.EOF) {
 			symb.log(logger);
+			System.out.println("<"+symb.token + ", " + symb.lexeme + ", " + symb.location() +">");
+		}
 		return symb;
 	}
 
@@ -75,17 +76,78 @@ public class LexAn extends Phase {
 	 *         any more.
 	 */
 	private Symbol lexify() {
-		// TODO
+		if(cc == 0) { // Should only run the first time
+			cc = readNextCharacter();
+		}
+		while(cc == '\n'|| cc == ' ') {
+			if(cc == '\n') {
+				line++;
+				character = 1;
+			}
+			cc = readNextCharacter();
+		}
+		
+		String lexeme = (char)cc + "";
+				
+		switch(cc) {
+			
+			case '+': // +
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.ADD, lexeme);
+				
+			case '-': // -
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.SUB, lexeme);
+				
+			case '<': // <, <=
+				cc = readNextCharacter();
+				if(cc == '=') {
+					lexeme += (char)cc;					
+					cc = readNextCharacter();
+					return createSymbol(Symbol.Term.LEQ, lexeme);
+				} else {
+					return createSymbol(Symbol.Term.LTH, lexeme);
+				}
+			case '>': // >, >=
+				cc = readNextCharacter();
+				if(cc == '=') {
+					lexeme += (char)cc;					
+					cc = readNextCharacter();
+					return createSymbol(Symbol.Term.GEQ, lexeme);
+				} else {
+					return createSymbol(Symbol.Term.GTH, lexeme);
+				}
+				
+			case -1:
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.EOF, "");
+		}
+		
+		return null;
+	}
+	
+	int line = 1;
+	int character = 1;
+	int cc = 0;
+	/**
+	 * Reads the next character from the BufferedStream
+	 * */
+	// TODO: Eliminate whitespace
+	private int readNextCharacter() {
 		int readValue = 0;
 		try {
-			while((readValue = srcFile.read()) != -1) {
-				char c = (char) readValue;
-				System.out.print(c);
-			}
+			readValue = srcFile.read();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return new Symbol(Symbol.Term.EOF, "", new Location(0, 0, 0, 0));
+		return readValue;
+	} 
+	
+	private Symbol createSymbol(Symbol.Term term, String lexan) {
+		int charStart = character;
+		int charEnd = charStart + lexan.length() - 1;
+		character += lexan.length();
+		return new Symbol(term, lexan, new Location(line, charStart, line, charEnd));
 	}
 
 }
