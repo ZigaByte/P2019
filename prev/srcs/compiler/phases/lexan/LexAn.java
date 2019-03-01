@@ -65,6 +65,44 @@ public class LexAn extends Phase {
 		return symb;
 	}
 
+	// Returns true if next character is not part of a whitespace
+	private boolean isWhiteSpace(){
+		return cc == ' ' || cc == '\n' || cc == '\r' || cc == '\t';
+	}
+	
+	private boolean isCommentStart(){
+		return cc == '#';
+	}
+	
+	private void skipWhiteSpace(){
+		// Skip whitespace
+		while(cc == '\n' || cc == '\r' || cc == ' ' || cc == '\t') {
+			if(cc == '\n') {
+				line++;
+				character = 1;
+			}
+			cc = readNextCharacter();
+		}
+	}
+	
+	// Returns true if the next character is not part of a comment
+	private Symbol skipComment(){
+		// Remove comments starting with # and until end of line
+		while (cc == '#') {
+			while(cc != -1 && cc != '\n'){ // Continue until linebreak or eof
+				cc = readNextCharacter();
+			}
+			if (cc == -1){
+				return createSymbol(Symbol.Term.EOF, "");
+			}
+			if(cc == '\n'){
+				cc = readNextCharacter();
+				line++;	
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Performs the lexical analysis of the source file.
 	 * 
@@ -79,26 +117,44 @@ public class LexAn extends Phase {
 		if(cc == 0) { // Should only run the first time
 			cc = readNextCharacter();
 		}
-		while(cc == '\n'|| cc == ' ') {
-			if(cc == '\n') {
-				line++;
-				character = 1;
-			}
-			cc = readNextCharacter();
+
+		while(isWhiteSpace() || isCommentStart()){
+			Symbol eof = skipComment();
+			if(eof != null)
+				return eof;
+			skipWhiteSpace();
 		}
-		
+
 		String lexeme = (char)cc + "";
-				
+				System.out.println((char)cc);
 		switch(cc) {
-			
-			case '+': // +
+			case '!': // ! !=
 				cc = readNextCharacter();
-				return createSymbol(Symbol.Term.ADD, lexeme);
-				
-			case '-': // -
+				if(cc == '=') {
+					lexeme += (char)cc;					
+					cc = readNextCharacter();
+					return createSymbol(Symbol.Term.NEQ, lexeme);
+				} else {
+					return createSymbol(Symbol.Term.NOT, lexeme);
+				}
+			case '|': // |
 				cc = readNextCharacter();
-				return createSymbol(Symbol.Term.SUB, lexeme);
-				
+				return createSymbol(Symbol.Term.IOR, lexeme); // TODO: CHECK IF CORRECT
+			case '^': // ^
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.XOR, lexeme);
+			case '&': // &
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.AND, lexeme);
+			case '=': // ==, =
+				cc = readNextCharacter();
+				if(cc == '=') {
+					lexeme += (char) cc;					
+					cc = readNextCharacter();
+					return createSymbol(Symbol.Term.EQU, lexeme);
+				} else {
+					return createSymbol(Symbol.Term.ASSIGN, lexeme);
+				}
 			case '<': // <, <=
 				cc = readNextCharacter();
 				if(cc == '=') {
@@ -117,6 +173,57 @@ public class LexAn extends Phase {
 				} else {
 					return createSymbol(Symbol.Term.GTH, lexeme);
 				}
+			case '+': // +
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.ADD, lexeme);
+			case '-': // -
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.SUB, lexeme);
+			case '*': // *
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.MUL, lexeme);
+			case '/': // /
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.DIV, lexeme);
+			case '%': // /
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.MOD, lexeme);
+			case '$': // $
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.ADDR, lexeme); // TODO: CHECK IF CORRECT
+			case '@': // @
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.ADDR, lexeme); // TODO: CHECK IF CORRECT
+			case '.': // .
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.DOT, lexeme);
+			case ',': // ,
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.COMMA, lexeme);
+			case ':': // ,
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.COLON, lexeme);
+			case ';': // ,
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.SEMIC, lexeme);
+			case '[': // [
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.LBRACKET, lexeme);
+			case ']': // ]
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.RBRACKET, lexeme);
+			case '(': // (
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.LPARENTHESIS, lexeme);
+			case ')': // )
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.RPARENTHESIS, lexeme);
+			case '{': // {
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.LBRACE, lexeme);
+			case '}': // }
+				cc = readNextCharacter();
+				return createSymbol(Symbol.Term.RBRACE, lexeme);
 				
 			case -1:
 				cc = readNextCharacter();
