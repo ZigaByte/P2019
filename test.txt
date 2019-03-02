@@ -1,5 +1,13 @@
-#abc
-++[]#abc
-#abc[][]['sdfs
-				#abc
-++		#abc
+int a = 1;
+int b = 1;
+
+fun test (int a, int b) {
+	if (a > 100) {
+		return a; # just return a
+	}
+	return a + test(b, a + b);
+}
+
+test(a, b);
+
+b = "This is just a test text";

@@ -4,7 +4,9 @@
 package compiler.phases.lexan;
 
 import java.io.*;
+import java.util.HashMap;
 
+import javafx.scene.input.KeyCode;
 import compiler.common.report.*;
 import compiler.data.symbol.*;
 import compiler.phases.*;
@@ -21,6 +23,8 @@ public class LexAn extends Phase {
 
 	/** The source file reader. */
 	private final BufferedReader srcFile;
+	
+	private final HashMap<String, Symbol.Term> keywords = new HashMap<String, Symbol.Term>();
 
 	/**
 	 * Constructs a new phase of lexical analysis.
@@ -33,6 +37,31 @@ public class LexAn extends Phase {
 		} catch (IOException ___) {
 			throw new Report.Error("Cannot open source file '" + srcFileName + "'.");
 		}
+		
+		keywords.put("arr", Symbol.Term.ARR);
+		keywords.put("bool", Symbol.Term.BOOL);
+		keywords.put("char", Symbol.Term.CHAR);
+		keywords.put("del", Symbol.Term.DEL);
+		keywords.put("do", Symbol.Term.DO);
+		keywords.put("else", Symbol.Term.ELSE);
+		keywords.put("end", Symbol.Term.END);
+		keywords.put("fun", Symbol.Term.FUN);
+		keywords.put("if", Symbol.Term.IF);
+		keywords.put("int", Symbol.Term.INT);
+		keywords.put("new", Symbol.Term.NEW);
+		keywords.put("ptr", Symbol.Term.PTR);
+		keywords.put("rec", Symbol.Term.REC);
+		keywords.put("then", Symbol.Term.THEN);
+		keywords.put("typ", Symbol.Term.TYP);
+		keywords.put("var", Symbol.Term.VAR);
+		keywords.put("void", Symbol.Term.VOID);
+		keywords.put("where", Symbol.Term.WHERE);
+		keywords.put("while", Symbol.Term.WHILE);
+		
+		keywords.put("none", Symbol.Term.VOIDCONST);
+		keywords.put("true", Symbol.Term.BOOLCONST);
+		keywords.put("false", Symbol.Term.BOOLCONST);
+		keywords.put("null", Symbol.Term.PTRCONST);
 	}
 
 	@Override
@@ -77,9 +106,13 @@ public class LexAn extends Phase {
 	private void skipWhiteSpace(){
 		// Skip whitespace
 		while(cc == '\n' || cc == '\r' || cc == ' ' || cc == '\t') {
+			if(cc == ' '){
+				character++;
+			}else if(cc == '\t'){
+				character += 8; // Tab is 8 spaces 
+			}
 			if(cc == '\n') {
-				line++;
-				character = 1;
+				nextLine();
 			}
 			cc = readNextCharacter();
 		}
@@ -97,7 +130,7 @@ public class LexAn extends Phase {
 			}
 			if(cc == '\n'){
 				cc = readNextCharacter();
-				line++;	
+				nextLine();
 			}
 		}
 		return null;
@@ -126,7 +159,7 @@ public class LexAn extends Phase {
 		}
 
 		String lexeme = (char)cc + "";
-				System.out.println((char)cc);
+
 		switch(cc) {
 			case '!': // ! !=
 				cc = readNextCharacter();
@@ -228,14 +261,82 @@ public class LexAn extends Phase {
 			case -1:
 				cc = readNextCharacter();
 				return createSymbol(Symbol.Term.EOF, "");
+				
+			default: // All other things, literals, keywords, identifiers
+				if ('0' <= cc && cc <= '9') { // literal of type int
+					cc = readNextCharacter();
+					while('0' <= cc && cc <= '9'){
+						lexeme += (char)cc;
+						cc = readNextCharacter();
+					}
+					return createSymbol(Symbol.Term.INTCONST, lexeme);
+				}
+				if (cc == '\'') { // literal of type char
+					cc = readNextCharacter();
+					if(32 <= cc && cc <= 126){
+						lexeme += (char) cc;
+						cc = readNextCharacter();
+						if(cc == '\''){
+							lexeme += (char) cc;
+							cc = readNextCharacter();
+							return createSymbol(Symbol.Term.CHARCONST, lexeme);
+						}else{
+							// CHAR ERROR, was not closed
+						}
+					}else{
+						// CHAR ERROR, char not supported
+					}
+				}
+				
+				if(cc == '"'){ // literal of type string
+					// Read content
+					cc = readNextCharacter();
+					while(32 <= cc && cc <= 126 && cc != '"'){
+						lexeme += (char)cc;
+						cc = readNextCharacter();
+					}
+					
+					// Closing "
+					if(cc == '"'){
+						lexeme += (char) cc;
+						cc = readNextCharacter();
+						return createSymbol(Symbol.Term.STRCONST, lexeme);
+					}else{
+						// STRCONST ERROR, was not closed
+					}
+				}
+				
+				// keywords, literals (none, true, false, null), identifiers
+				if(('A' <= cc && cc <= 'Z') || ('a' <= cc && cc <= 'z') || cc == '_'){
+					cc = readNextCharacter();
+					while(('A' <= cc && cc <= 'Z') || ('a' <= cc && cc <= 'z') || ('0' <= cc && cc <= '9') || cc == '_'){
+						lexeme += (char)cc;
+						cc = readNextCharacter();
+					}
+					
+					// Check if keyword or literal
+					if(keywords.containsKey(lexeme)){
+						return createSymbol(keywords.get(lexeme), lexeme);
+					}
+					
+					// Else identifier
+					return createSymbol(Symbol.Term.IDENTIFIER, lexeme);
+				}
+				
+				break;
 		}
 		
 		return null;
 	}
 	
+	public void nextLine(){
+		line++;
+		character = 1;
+	}
+	
 	int line = 1;
 	int character = 1;
-	int cc = 0;
+	int cc = 0; // Current character
 	/**
 	 * Reads the next character from the BufferedStream
 	 * */
