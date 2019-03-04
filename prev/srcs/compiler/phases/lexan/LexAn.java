@@ -172,7 +172,7 @@ public class LexAn extends Phase {
 				}
 			case '|': // |
 				cc = readNextCharacter();
-				return createSymbol(Symbol.Term.IOR, lexeme); // TODO: CHECK IF CORRECT
+				return createSymbol(Symbol.Term.IOR, lexeme);
 			case '^': // ^
 				cc = readNextCharacter();
 				return createSymbol(Symbol.Term.XOR, lexeme);
@@ -223,10 +223,10 @@ public class LexAn extends Phase {
 				return createSymbol(Symbol.Term.MOD, lexeme);
 			case '$': // $
 				cc = readNextCharacter();
-				return createSymbol(Symbol.Term.ADDR, lexeme); // TODO: CHECK IF CORRECT
+				return createSymbol(Symbol.Term.DATA, lexeme); 
 			case '@': // @
 				cc = readNextCharacter();
-				return createSymbol(Symbol.Term.ADDR, lexeme); // TODO: CHECK IF CORRECT
+				return createSymbol(Symbol.Term.ADDR, lexeme);
 			case '.': // .
 				cc = readNextCharacter();
 				return createSymbol(Symbol.Term.DOT, lexeme);
