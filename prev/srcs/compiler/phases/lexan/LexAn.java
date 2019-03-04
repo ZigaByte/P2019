@@ -8,6 +8,7 @@ import java.util.HashMap;
 
 import javafx.scene.input.KeyCode;
 import compiler.common.report.*;
+import compiler.common.report.Report.Error;
 import compiler.data.symbol.*;
 import compiler.phases.*;
 
@@ -281,10 +282,12 @@ public class LexAn extends Phase {
 							cc = readNextCharacter();
 							return createSymbol(Symbol.Term.CHARCONST, lexeme);
 						}else{
-							// CHAR ERROR, was not closed
+							Error noClosingError = createError("CHARCONST missing closing '.");
+							throw noClosingError;
 						}
 					}else{
-						// CHAR ERROR, char not supported
+						Error characterNotSupportedError = createError("Character not supported");
+						throw characterNotSupportedError;
 					}
 				}
 				
@@ -302,7 +305,8 @@ public class LexAn extends Phase {
 						cc = readNextCharacter();
 						return createSymbol(Symbol.Term.STRCONST, lexeme);
 					}else{
-						// STRCONST ERROR, was not closed
+						Error noClosingError = createError("STRCONST missing closing \".");
+						throw noClosingError;
 					}
 				}
 				
@@ -356,6 +360,10 @@ public class LexAn extends Phase {
 		int charEnd = charStart + lexan.length() - 1;
 		character += lexan.length();
 		return new Symbol(term, lexan, new Location(line, charStart, line, charEnd));
+	}
+	
+	private Error createError(String message) {
+		return new Error(new Location(line, character, line, character), message);
 	}
 
 }
