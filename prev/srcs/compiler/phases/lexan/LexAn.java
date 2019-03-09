@@ -90,8 +90,8 @@ public class LexAn extends Phase {
 		Symbol symb = lexify();
 		if (symb.token != Symbol.Term.EOF) {
 			symb.log(logger);
-			System.out.println("<"+symb.token + ", " + symb.lexeme + ", " + symb.location() +">");
 		}
+		System.out.println(String.format("Returning %s", symb));
 		return symb;
 	}
 

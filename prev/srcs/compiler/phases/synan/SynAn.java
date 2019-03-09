@@ -3,9 +3,13 @@
  */
 package compiler.phases.synan;
 
+import java.util.ArrayList;
+
 import compiler.common.report.*;
 import compiler.data.symbol.*;
+import compiler.data.symbol.Symbol.Term;
 import compiler.data.dertree.*;
+import compiler.data.dertree.DerNode.Nont;
 import compiler.phases.*;
 import compiler.phases.lexan.*;
 
@@ -91,12 +95,58 @@ public class SynAn extends Phase {
 			throw new Report.Error(currSymb, errorMsg);
 	}
 
+	// source -> decls
 	private DerNode parseSource() {
 		DerNode node = new DerNode(DerNode.Nont.Source);
 		node.add(parseDecls());
 		return node;
 	}
 
-	// TODO
+	// decls -> decl declsRest
+	private DerNode parseDecls(){
+		DerNode declsNode = new DerNode(DerNode.Nont.Decls);
+		declsNode.add(parseDecl());
+		declsNode.add(parseDeclsRest());
+		return declsNode;
+	}
+	
+	// decl -> typ identifier:type; 
+	// decl -> var identifier:type;
+	// decl -> identifier([identifier:type {,identifier:type}]):type [=expr];
+	private DerNode parseDecl(){
+		DerNode declNode = new DerNode(DerNode.Nont.Decls);
+		switch(currSymb.token){
+			case TYP:{
+				add(declNode, Term.TYP, String.format("Expected symbol \'%s\', but received \'%s\'.", Term.TYP, currSymb.token));
+				add(declNode, Term.IDENTIFIER, String.format("Expected symbol \'%s\', but received \'%s\'.", Term.IDENTIFIER, currSymb.token));
+				add(declNode, Term.COLON, String.format("Expected symbol \'%s\', but received \'%s\'.", Term.COLON, currSymb.token));
+				declNode.add(parseType());
+				add(declNode, Term.SEMIC, String.format("Expected symbol \'%s\', but received \'%s\'.", Term.SEMIC, currSymb.token));
+				break;
+			}
+			case VAR:{
+				break;
+			}
+			case FUN:{
+				break;
+			}	
+			default:
+				throw new Report.Error(currSymb, "Symbol not expected. Expected a declaration");
+		}
+		return declNode;
+	}
+	
+	private DerNode parseDeclsRest(){
+		return new DerNode(Nont.ParDeclsEps);
+	}
 
+	private DerNode parseType(){
+		DerNode node = new DerNode(Nont.Type);
+		add(node, Term.INT, "Int expected.");
+		return node;
+	}
+	
+	
+	
+	
 }
