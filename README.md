@@ -13,6 +13,9 @@ Makefiles can be used or run by java commands. The commands are scanned in Main.
 
 The output is generated as an .xml file and .html file that displays the xml output in a nice way. Open it in a browser. XML files are the required output for the assignment checking.
 
+To run Lexan phase:
+test.txt --target-phase=lexan --logged-phase=lexan
+
 ## Phases
 All phases terminate with first error. 
 
