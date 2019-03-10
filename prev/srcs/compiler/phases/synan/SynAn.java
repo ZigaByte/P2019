@@ -114,14 +114,14 @@ public class SynAn extends Phase {
 	// decl -> var identifier:type;
 	// decl -> identifier([identifier:type {,identifier:type}]):type [=expr];
 	private DerNode parseDecl(){
-		DerNode declNode = new DerNode(DerNode.Nont.Decls);
+		DerNode declNode = new DerNode(DerNode.Nont.Decl);
 		switch(currSymb.token){
 			case TYP:{
-				add(declNode, Term.TYP, String.format("Expected symbol \'%s\', but received \'%s\'.", Term.TYP, currSymb.token));
-				add(declNode, Term.IDENTIFIER, String.format("Expected symbol \'%s\', but received \'%s\'.", Term.IDENTIFIER, currSymb.token));
-				add(declNode, Term.COLON, String.format("Expected symbol \'%s\', but received \'%s\'.", Term.COLON, currSymb.token));
+				add(declNode, Term.TYP, String.format("Expected symbol %s, but received %s.", Term.TYP, currSymb.token));
+				add(declNode, Term.IDENTIFIER, String.format("Expected symbol %s, but received %s.", Term.IDENTIFIER, currSymb.token));
+				add(declNode, Term.COLON, String.format("Expected symbol %s, but received %s.", Term.COLON, currSymb.token));
 				declNode.add(parseType());
-				add(declNode, Term.SEMIC, String.format("Expected symbol \'%s\', but received \'%s\'.", Term.SEMIC, currSymb.token));
+				add(declNode, Term.SEMIC, String.format("Expected symbol %s, but received %s.", Term.SEMIC, currSymb.token));
 				break;
 			}
 			case VAR:{
@@ -131,19 +131,75 @@ public class SynAn extends Phase {
 				break;
 			}	
 			default:
-				throw new Report.Error(currSymb, "Symbol not expected. Expected a declaration");
+				throw new Report.Error(currSymb, String.format("Symbol %s not expected.", currSymb));
 		}
 		return declNode;
 	}
 	
+	// TODO: Other declarations
 	private DerNode parseDeclsRest(){
 		return new DerNode(Nont.ParDeclsEps);
 	}
 
+	// type -> void | bool | char | int
+	// type -> arr [expr] type
+	// type -> rec (identifier:type {,identifier:type})
+	// type -> ptr type
+	// type -> identifier
+	// type -> (type)
 	private DerNode parseType(){
-		DerNode node = new DerNode(Nont.Type);
-		add(node, Term.INT, "Int expected.");
-		return node;
+		DerNode typeNode = new DerNode(Nont.Type);
+		switch(currSymb.token){
+		case VOID:
+			add(typeNode, Term.VOID, String.format("Expected symbol %s, but received %s.", Term.VOID, currSymb.token));
+			break;
+		case BOOL:
+			add(typeNode, Term.BOOL, String.format("Expected symbol %s, but received %s.", Term.BOOL, currSymb.token));
+			break;
+		case CHAR:
+			add(typeNode, Term.CHAR, String.format("Expected symbol %s, but received %s.", Term.CHAR, currSymb.token));
+			break;
+		case INT:
+			add(typeNode, Term.INT, String.format("Expected symbol %s, but received %s.", Term.INT, currSymb.token));
+			break;		
+		case ARR:{
+			add(typeNode, Term.ARR, String.format("Expected symbol %s, but received %s.", Term.ARR, currSymb.token));
+			add(typeNode, Term.LBRACKET, String.format("Expected symbol %s, but received %s.", Term.LBRACKET, currSymb.token));
+			typeNode.add(parseExpr());
+			add(typeNode, Term.RBRACKET, String.format("Expected symbol %s, but received %s.", Term.RBRACKET, currSymb.token));
+			typeNode.add(parseType());
+			break;
+		}
+		case REC:{
+			// TODO: What is this????
+			break;
+		}	
+		case PTR:{
+			add(typeNode, Term.PTR, String.format("Expected symbol %s, but received %s.", Term.PTR, currSymb.token));
+			typeNode.add(parseType());
+			break;
+		}
+		case IDENTIFIER:
+			add(typeNode, Term.IDENTIFIER, String.format("Expected symbol %s, but received %s.", Term.IDENTIFIER, currSymb.token));
+			break;
+		case LPARENTHESIS:{
+			add(typeNode, Term.LPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.LPARENTHESIS, currSymb.token));
+			typeNode.add(parseType());
+			add(typeNode, Term.RPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.RPARENTHESIS, currSymb.token));
+			break;
+		}
+		default:
+			throw new Report.Error(currSymb, String.format("Symbol %s not expected.", currSymb));
+	}
+		
+		
+		
+		return typeNode;
+	}
+	
+	private DerNode parseExpr(){
+		DerNode exprNode = new DerNode(Nont.Expr);
+		return exprNode;
 	}
 	
 	

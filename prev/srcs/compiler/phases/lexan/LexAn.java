@@ -91,7 +91,7 @@ public class LexAn extends Phase {
 		if (symb.token != Symbol.Term.EOF) {
 			symb.log(logger);
 		}
-		System.out.println(String.format("Returning %s", symb));
+		//System.out.println(String.format("Returning %s", symb));
 		return symb;
 	}
 
@@ -224,10 +224,10 @@ public class LexAn extends Phase {
 				return createSymbol(Symbol.Term.MOD, lexeme);
 			case '$': // $
 				cc = readNextCharacter();
-				return createSymbol(Symbol.Term.DATA, lexeme); 
+				return createSymbol(Symbol.Term.ADDR, lexeme); 
 			case '@': // @
 				cc = readNextCharacter();
-				return createSymbol(Symbol.Term.ADDR, lexeme);
+				return createSymbol(Symbol.Term.DATA, lexeme);
 			case '.': // .
 				cc = readNextCharacter();
 				return createSymbol(Symbol.Term.DOT, lexeme);
@@ -330,7 +330,8 @@ public class LexAn extends Phase {
 				break;
 		}
 		
-		return null;
+		Error noClosingError = createError("Unknown character.");
+		throw noClosingError;
 	}
 	
 	public void nextLine(){
