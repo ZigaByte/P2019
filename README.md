@@ -25,6 +25,37 @@ All phases terminate with first error.
 
 To get Symbols from the LexAn use the lexer() method from LexAn.java to get the next symbol from the source file.
 
+### SynAn
+
+We have to transform the ambigious CFG provided into a LL(1) compatible grammar. 
+
+Example:
+```
+E -> num
+E -> E + E | E - E | E \* E | E / E |
+E -> ( E )
+```
+To make + left associative:
+```
+T -> T + F
+F -> num
+```
+Priority:
+E describes expressions with +,-,\*,/ or no operator as the top operator.
+T describes expressions with \*,/ or no operator as the top operator.
+F describes expressions with no operator as the top operator.
+```
+E -> E + T | E - T | T
+T -> T \* F | T / F | F
+F -> num
+```
+Which would turn 1\*2+3 into derivation E -> E+T -> T+T -> T\*F+T -> F\*F+T -> 1\*F+T -> 1\*2+T -> 1\*2+F -> 1\*2+3. Even though this is unambigious it is still not LL(1).
+The problem is the left recursion. To get rid of it, we add E' (as an example).
+```
+E -> T E'
+E' -> + T E' | - T E' | eps
+```
+You can also use the tool at: http://mdaines.github.io/grammophone/ -> input your cfg -> transform -> remove left recursion.
 
 ## Notes:
 - System.out.println is not allowed for grading, should be turned off before turning in any of the assignments.
