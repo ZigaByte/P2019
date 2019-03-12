@@ -1,0 +1,98 @@
+source -> decl decl' .
+
+decl' -> decl decl' .
+decl' -> .
+decl -> typ identifier : type ; .
+decl -> var identifier : type ; .
+decl -> fun identifier ( args ) : type body ; .
+
+body -> = expr .
+body -> .
+
+rec_args -> identifier : type args .
+args -> identifier : type args' .
+args -> .
+args' -> , identifier : type args' .
+args' -> .
+
+type -> void .
+type -> bool .
+type -> char .
+type -> int .
+type -> arr [ expr ] type .
+type -> rec ( rec_args ) .
+type -> ptr type .
+type -> identifier .
+type -> ( type ) .
+
+stmt -> expr stmt_maybe ; .
+stmt_maybe -> = expr .
+stmt_maybe -> .
+stmt -> if expr then stmt_block else_block end ; .
+stmt -> while expr do stmt_block end ; .
+else_block -> else stmt_block .
+else_block -> .
+stmt_block -> stmt stmt_block' .
+stmt_block' -> .
+stmt_block' -> stmt_block .
+
+args_expr -> expr args_expr' .
+args_expr -> .
+args_expr' -> , expr args_expr' .
+args_expr' -> .
+where_block -> where source .
+
+expr -> exprE .
+exprE -> exprF exprE' .
+exprE' -> OR exprF exprE' .
+exprE' -> ^ exprF exprE' .
+exprE' -> .
+
+exprF -> exprG exprF' .
+exprF' -> & exprG exprF' .
+exprF' -> .
+
+exprG -> exprH exprG' .
+exprG' -> == exprH exprG' .
+exprG' -> != exprH exprG' .
+exprG' -> <= exprH exprG' .
+exprG' -> >= exprH exprG' .
+exprG' -> < exprH exprG' .
+exprG' -> > exprH exprG' .
+exprG' -> .
+
+exprH -> exprI exprH' .
+exprH' -> + exprI exprH' .
+exprH' -> - exprI exprH' .
+exprH' -> .
+
+exprI -> exprJ exprI' .
+exprI' -> * exprJ exprI' .
+exprI' -> / exprJ exprI' .
+exprI' -> % exprJ exprI' .
+exprI' -> .
+
+exprJ -> ! exprJ .
+exprJ -> + exprJ .
+exprJ -> - exprJ .
+exprJ -> $ exprJ .
+exprJ -> @ exprJ .
+exprJ -> new ( type ) .
+exprJ -> del ( expr ) .
+exprJ -> exprK .
+
+exprK -> exprL exprK' .
+exprK' -> [ expr ] exprK' .
+exprK' -> DOT identifier exprK' .
+exprK' -> .
+
+exprL -> ( expr expr_cast .
+exprL -> exprM .
+exprM -> literal .
+exprM -> identifier expr_call .
+exprM -> { stmt_block : expr where_block } .
+
+expr_call -> ( args_expr ) .
+expr_call -> .
+expr_cast -> : type ) .
+expr_cast -> ) .
