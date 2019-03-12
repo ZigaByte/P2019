@@ -6,7 +6,6 @@ package compiler.phases.lexan;
 import java.io.*;
 import java.util.HashMap;
 
-import javafx.scene.input.KeyCode;
 import compiler.common.report.*;
 import compiler.common.report.Report.Error;
 import compiler.data.symbol.*;

@@ -3,8 +3,6 @@
  */
 package compiler.phases.synan;
 
-import java.util.ArrayList;
-
 import compiler.common.report.*;
 import compiler.data.symbol.*;
 import compiler.data.symbol.Symbol.Term;
