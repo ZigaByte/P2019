@@ -114,10 +114,7 @@ public class SynAn extends Phase {
 		}
 
 	}
-	
-	// decl -> typ identifier:type; 
-	// decl -> var identifier:type;
-	// decl -> identifier([identifier:type {,identifier:type}]):type [=expr];
+
 	private DerNode parseDecl(){
 		DerNode declNode = new DerNode(DerNode.Nont.Decl);
 		switch(currSymb.token){
@@ -735,7 +732,7 @@ public class SynAn extends Phase {
 		DerNode exprNode = new DerNode(Nont.AtomExpr);
 		switch (currSymb.token) {
 		case IDENTIFIER:
-			add(exprNode, Term.LPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.LPARENTHESIS, currSymb.token));
+			add(exprNode, Term.IDENTIFIER, String.format("Expected symbol %s, but received %s.", Term.IDENTIFIER, currSymb.token));
 			exprNode.add(parseCallEps());
 			return exprNode;
 		case VOIDCONST:			
