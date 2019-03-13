@@ -151,7 +151,7 @@ public class SynAn extends Phase {
 				break;
 			}	
 			default:
-				throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+				throw new Report.Error(currSymb, String.format("[parseDecl] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 		return declNode;
 	}
@@ -166,7 +166,7 @@ public class SynAn extends Phase {
 			bodyNode.add(parseExpr());
 			return bodyNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s not expected.", currSymb));
+			throw new Report.Error(currSymb, String.format("[parseBody] Symbol %s not expected.", currSymb));
 		}
 	}
 	
@@ -179,7 +179,7 @@ public class SynAn extends Phase {
 			argNode.add(parseType());
 			return argNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseArg] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -194,7 +194,7 @@ public class SynAn extends Phase {
 		case RPARENTHESIS:
 			return argsNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseArgsRest] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -208,7 +208,7 @@ public class SynAn extends Phase {
 		case RPARENTHESIS:
 			return argsNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseArgs] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -258,7 +258,7 @@ public class SynAn extends Phase {
 				return typeNode;
 			}
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseType] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -297,7 +297,7 @@ public class SynAn extends Phase {
 			return stmtNode;
 			
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseStmt] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 		
 	}
@@ -325,8 +325,13 @@ public class SynAn extends Phase {
 			stmtNode.add(parseStmt());
 			stmtNode.add(parseStmts());
 			return stmtNode;	
+			
+		case COLON:
+		case END:
+		case ELSE:
+			return stmtNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseStmts] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -341,7 +346,7 @@ public class SynAn extends Phase {
 			elseNode.add(parseStmts());
 			return elseNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseElse] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 
@@ -368,7 +373,7 @@ public class SynAn extends Phase {
 		case LPARENTHESIS:
 				return argsFunNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseArgsFunRest] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -380,8 +385,10 @@ public class SynAn extends Phase {
 			whereEpsNode.add(parseDecl());
 			whereEpsNode.add(parseDecls());
 			return whereEpsNode;		
+		case RBRACE:
+			return whereEpsNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseWhereEps] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -412,6 +419,7 @@ public class SynAn extends Phase {
 		case THEN:
 		case DO:
 		case WHERE:
+		case RBRACE:
 			return exprNode;
 		case IOR:
 			add(exprNode, Term.IOR, String.format("Expected symbol %s, but received %s.", Term.IOR, currSymb.token));
@@ -424,7 +432,7 @@ public class SynAn extends Phase {
 			exprNode.add(parseDisjExprRest());
 			return exprNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseDisjExprRest] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -447,6 +455,7 @@ public class SynAn extends Phase {
 		case THEN:
 		case DO:
 		case WHERE:
+		case RBRACE:
 		case IOR:
 		case XOR:
 			return exprNode;
@@ -456,7 +465,7 @@ public class SynAn extends Phase {
 			exprNode.add(parseConjExprRest());
 			return exprNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseConjExprRest] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -479,6 +488,7 @@ public class SynAn extends Phase {
 		case THEN:
 		case DO:
 		case WHERE:
+		case RBRACE:
 		case IOR:
 		case XOR:
 		case AND:
@@ -508,7 +518,7 @@ public class SynAn extends Phase {
 			exprNode.add(parseAddExpr());
 			return exprNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseRelExprRest] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -531,6 +541,7 @@ public class SynAn extends Phase {
 		case THEN:
 		case DO:
 		case WHERE:
+		case RBRACE:
 		case IOR:
 		case XOR:
 		case AND:		
@@ -552,7 +563,7 @@ public class SynAn extends Phase {
 			exprNode.add(parseAddExprRest());
 			return exprNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseAddExprRest] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -575,6 +586,7 @@ public class SynAn extends Phase {
 		case THEN:
 		case DO:
 		case WHERE:
+		case RBRACE:
 		case IOR:
 		case XOR:
 		case AND:		
@@ -603,7 +615,7 @@ public class SynAn extends Phase {
 			exprNode.add(parseMulExprRest());
 			return exprNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseMulExprRest] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -626,7 +638,7 @@ public class SynAn extends Phase {
 			exprNode.add(parsePrefExpr());
 			return exprNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parsePrefExpr] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -646,7 +658,7 @@ public class SynAn extends Phase {
 			exprNode.add(parsePstfExprRest());
 			return exprNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parsePstfExpr] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -662,6 +674,7 @@ public class SynAn extends Phase {
 		case THEN:
 		case DO:
 		case WHERE:
+		case RBRACE:
 		case IOR:
 		case XOR:
 		case AND:		
@@ -687,7 +700,7 @@ public class SynAn extends Phase {
 			add(exprNode, Term.RBRACKET, String.format("Expected symbol %s, but received %s.", Term.RBRACKET, currSymb.token));
 			return exprNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parsePstfExprRest] ExprSymbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -710,7 +723,7 @@ public class SynAn extends Phase {
 			exprNode.add(parseCastEps());
 			return exprNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseCastExpr] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -750,7 +763,7 @@ public class SynAn extends Phase {
 			add(exprNode, Term.RBRACE, String.format("Expected symbol %s, but received %s.", Term.RBRACE, currSymb.token));
 			return exprNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseAtomExpr] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -766,7 +779,7 @@ public class SynAn extends Phase {
 			add(exprNode, Term.RPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.RPARENTHESIS, currSymb.token));
 			return exprNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseCastEps] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 	
@@ -782,6 +795,7 @@ public class SynAn extends Phase {
 		case THEN:
 		case DO:
 		case WHERE:
+		case RBRACE:
 		case IOR:
 		case XOR:
 		case AND:		
@@ -805,7 +819,7 @@ public class SynAn extends Phase {
 			add(exprNode, Term.RPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.RPARENTHESIS, currSymb.token));
 			return exprNode;
 		default:
-			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+			throw new Report.Error(currSymb, String.format("[parseCallEps] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
 	}
 }

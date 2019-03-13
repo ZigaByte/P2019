@@ -26,7 +26,7 @@ type -> identifier .
 type -> ( type ) .
 
 stmt -> expr body ; .
-stmt' -> stmt stmt' .
+stmt' -> stmt stmt' | .
 stmt -> if expr then stmt stmt' else_block end ; .
 stmt -> while expr do stmt stmt' end ; .
 else_block -> else stmt stmt' .
