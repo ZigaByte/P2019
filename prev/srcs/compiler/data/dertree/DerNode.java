@@ -24,11 +24,12 @@ public class DerNode extends DerTree {
 		Decls, Decl, DeclsRest,
 		
 		Type, Expr, Identifier, 
-		Arg, ArgsRest,
+		Arg, Args, ArgsRest, // Declaration arguments
+		ArgsFun, ArgsFunRest, // Function call arguments
 		
 		ParDeclsEps, ParDecls, ParDeclsRest, ParDecl, BodyEps,  CompDecls, CompDeclsRest, CompDecl,
 		DisjExpr, DisjExprRest, ConjExpr, ConjExprRest, RelExpr, RelExprRest, AddExpr, AddExprRest, MulExpr,
-		MulExprRest, PrefExpr, PstfExpr, PstfExprRest, AtomExpr, CallEps, ArgsEps, CastEps,
+		MulExprRest, PrefExpr, PstfExpr, PstfExprRest, AtomExpr, CallEps, CastEps,
 		WhereEps, Stmts, StmtsRest, Stmt, AssignEps, ElseEps,
 	};
 
