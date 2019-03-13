@@ -637,6 +637,10 @@ public class SynAn extends Phase {
 			add(exprNode, Term.ADD, String.format("Expected symbol %s, but received %s.", Term.ADD, currSymb.token));
 			exprNode.add(parsePrefExpr());
 			return exprNode;
+		case SUB:
+			add(exprNode, Term.SUB, String.format("Expected symbol %s, but received %s.", Term.SUB, currSymb.token));
+			exprNode.add(parsePrefExpr());
+			return exprNode;
 		default:
 			throw new Report.Error(currSymb, String.format("[parsePrefExpr] Symbol %s (%s) not expected.", currSymb, currSymb.token));
 		}
