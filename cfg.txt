@@ -78,17 +78,17 @@ PrefExpr -> new ( type ) .
 PrefExpr -> del ( expr ) .
 PrefExpr -> PstfExpr .
 
-PstfExpr -> AtomExpr PstfExpr' .
-PstfExpr' -> [ expr ] PstfExpr' .
-PstfExpr' -> DOT identifier PstfExpr' .
+PstfExpr -> CastExpr PstfExpr' .
+PstfExpr' -> [ expr ] .
+PstfExpr' -> DOT identifier .
 PstfExpr' -> .
 
-AtomExpr -> ( expr expr_cast .
-AtomExpr -> exprM .
+CastExpr -> ( expr expr_cast .
+CastExpr -> AtomExpr .
 
-exprM -> literal .
-exprM -> identifier expr_call .
-exprM -> { stmt stmt' : expr where_block } .
+AtomExpr -> literal .
+AtomExpr -> identifier expr_call .
+AtomExpr -> { stmt stmt' : expr where_block } .
 
 expr_call -> ( args_expr ) .
 expr_call -> .

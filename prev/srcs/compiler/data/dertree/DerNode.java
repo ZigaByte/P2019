@@ -22,15 +22,18 @@ public class DerNode extends DerTree {
 	public enum Nont {
 		Source, 
 		Decls, Decl, DeclsRest,
+		Stmts, StmtsRest, Stmt,
 		
 		Type, Expr, Identifier, 
 		Arg, Args, ArgsRest, // Declaration arguments
 		ArgsFun, ArgsFunRest, // Function call arguments
 		
-		ParDeclsEps, ParDecls, ParDeclsRest, ParDecl, BodyEps,  CompDecls, CompDeclsRest, CompDecl,
 		DisjExpr, DisjExprRest, ConjExpr, ConjExprRest, RelExpr, RelExprRest, AddExpr, AddExprRest, MulExpr,
-		MulExprRest, PrefExpr, PstfExpr, PstfExprRest, AtomExpr, CallEps, CastEps,
-		WhereEps, Stmts, StmtsRest, Stmt, AssignEps, ElseEps,
+		MulExprRest, PrefExpr, PstfExpr, PstfExprRest, AtomExpr, CastExpr,
+		
+		ParDeclsEps, ParDecls, ParDeclsRest, ParDecl, BodyEps,  CompDecls, CompDeclsRest, CompDecl,
+		 CallEps, CastEps,
+		WhereEps,  AssignEps, ElseEps,
 	};
 
 	/** The CFG nonterminal this node represents. */

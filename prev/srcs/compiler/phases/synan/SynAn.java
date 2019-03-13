@@ -392,11 +392,420 @@ public class SynAn extends Phase {
 		return exprNode;
 	}
 	
+	
 	private DerNode parseDisjExpr() {
-		return null;
+		DerNode exprNode = new DerNode(Nont.DisjExpr);
+		exprNode.add(parseConjExpr());
+		exprNode.add(parseDisjExprRest());
+		return exprNode;
 	}
 	
+	private DerNode parseDisjExprRest() {
+		DerNode exprNode = new DerNode(Nont.DisjExprRest);
+		switch (currSymb.token) {
+		case COLON:
+		case SEMIC:	
+		case RPARENTHESIS:
+		case ASSIGN:
+		case COMMA:
+		case RBRACKET:
+		case THEN:
+		case DO:
+		case WHERE:
+			return exprNode;
+		case IOR:
+			add(exprNode, Term.IOR, String.format("Expected symbol %s, but received %s.", Term.IOR, currSymb.token));
+			exprNode.add(parseConjExpr());
+			exprNode.add(parseDisjExprRest());
+			return exprNode;
+		case XOR:
+			add(exprNode, Term.XOR, String.format("Expected symbol %s, but received %s.", Term.XOR, currSymb.token));
+			exprNode.add(parseConjExpr());
+			exprNode.add(parseDisjExprRest());
+			return exprNode;
+		default:
+			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+		}
+	}
 	
+	private DerNode parseConjExpr() {
+		DerNode exprNode = new DerNode(Nont.ConjExpr);
+		exprNode.add(parseRelExpr());
+		exprNode.add(parseConjExprRest());
+		return exprNode;
+	}
 	
+	private DerNode parseConjExprRest() {
+		DerNode exprNode = new DerNode(Nont.ConjExprRest);
+		switch (currSymb.token) {
+		case COLON:
+		case SEMIC:	
+		case RPARENTHESIS:
+		case ASSIGN:
+		case COMMA:
+		case RBRACKET:
+		case THEN:
+		case DO:
+		case WHERE:
+		case IOR:
+		case XOR:
+			return exprNode;
+		case AND:
+			add(exprNode, Term.AND, String.format("Expected symbol %s, but received %s.", Term.AND, currSymb.token));
+			exprNode.add(parseRelExpr());
+			exprNode.add(parseConjExprRest());
+			return exprNode;
+		default:
+			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+		}
+	}
 	
+	private DerNode parseRelExpr() {
+		DerNode exprNode = new DerNode(Nont.RelExpr);
+		exprNode.add(parseAddExpr());
+		exprNode.add(parseRelExprRest());
+		return exprNode;
+	}
+	
+	private DerNode parseRelExprRest() {
+		DerNode exprNode = new DerNode(Nont.RelExprRest);
+		switch (currSymb.token) {
+		case COLON:
+		case SEMIC:	
+		case RPARENTHESIS:
+		case ASSIGN:
+		case COMMA:
+		case RBRACKET:
+		case THEN:
+		case DO:
+		case WHERE:
+		case IOR:
+		case XOR:
+		case AND:
+			return exprNode;
+		case EQU:
+			add(exprNode, Term.EQU, String.format("Expected symbol %s, but received %s.", Term.EQU, currSymb.token));
+			exprNode.add(parseAddExpr());
+			return exprNode;
+		case NEQ:
+			add(exprNode, Term.NEQ, String.format("Expected symbol %s, but received %s.", Term.NEQ, currSymb.token));
+			exprNode.add(parseAddExpr());
+			return exprNode;
+		case LTH:
+			add(exprNode, Term.LTH, String.format("Expected symbol %s, but received %s.", Term.LTH, currSymb.token));
+			exprNode.add(parseAddExpr());
+			return exprNode;
+		case GTH:
+			add(exprNode, Term.GTH, String.format("Expected symbol %s, but received %s.", Term.GTH, currSymb.token));
+			exprNode.add(parseAddExpr());
+			return exprNode;
+		case GEQ:
+			add(exprNode, Term.GEQ, String.format("Expected symbol %s, but received %s.", Term.GEQ, currSymb.token));
+			exprNode.add(parseAddExpr());
+			return exprNode;
+		case LEQ:
+			add(exprNode, Term.LEQ, String.format("Expected symbol %s, but received %s.", Term.LEQ, currSymb.token));
+			exprNode.add(parseAddExpr());
+			return exprNode;
+		default:
+			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+		}
+	}
+	
+	private DerNode parseAddExpr() {
+		DerNode exprNode = new DerNode(Nont.AddExpr);
+		exprNode.add(parseMulExpr());
+		exprNode.add(parseAddExprRest());
+		return exprNode;
+	}
+	
+	private DerNode parseAddExprRest() {
+		DerNode exprNode = new DerNode(Nont.AddExprRest);
+		switch (currSymb.token) {
+		case COLON:
+		case SEMIC:	
+		case RPARENTHESIS:
+		case ASSIGN:
+		case COMMA:
+		case RBRACKET:
+		case THEN:
+		case DO:
+		case WHERE:
+		case IOR:
+		case XOR:
+		case AND:		
+		case EQU:
+		case NEQ:
+		case LTH:
+		case GTH:
+		case GEQ:
+		case LEQ:
+			return exprNode;
+		case ADD:
+			add(exprNode, Term.ADD, String.format("Expected symbol %s, but received %s.", Term.ADD, currSymb.token));
+			exprNode.add(parseMulExpr());
+			exprNode.add(parseAddExprRest());
+			return exprNode;
+		case SUB:
+			add(exprNode, Term.SUB, String.format("Expected symbol %s, but received %s.", Term.SUB, currSymb.token));
+			exprNode.add(parseMulExpr());
+			exprNode.add(parseAddExprRest());
+			return exprNode;
+		default:
+			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+		}
+	}
+	
+	private DerNode parseMulExpr() {
+		DerNode exprNode = new DerNode(Nont.MulExpr);
+		exprNode.add(parsePrefExpr());
+		exprNode.add(parseMulExprRest());
+		return exprNode;
+	}
+	
+	private DerNode parseMulExprRest() {
+		DerNode exprNode = new DerNode(Nont.MulExprRest);
+		switch (currSymb.token) {
+		case COLON:
+		case SEMIC:	
+		case RPARENTHESIS:
+		case ASSIGN:
+		case COMMA:
+		case RBRACKET:
+		case THEN:
+		case DO:
+		case WHERE:
+		case IOR:
+		case XOR:
+		case AND:		
+		case EQU:
+		case NEQ:
+		case LTH:
+		case GTH:
+		case GEQ:
+		case LEQ:
+		case ADD:
+		case SUB:
+			return exprNode;
+		case MUL:
+			add(exprNode, Term.MUL, String.format("Expected symbol %s, but received %s.", Term.MUL, currSymb.token));
+			exprNode.add(parsePrefExpr());
+			exprNode.add(parseMulExprRest());
+			return exprNode;
+		case DIV:
+			add(exprNode, Term.DIV, String.format("Expected symbol %s, but received %s.", Term.DIV, currSymb.token));
+			exprNode.add(parsePrefExpr());
+			exprNode.add(parseMulExprRest());
+			return exprNode;
+		case MOD:
+			add(exprNode, Term.MOD, String.format("Expected symbol %s, but received %s.", Term.MOD, currSymb.token));
+			exprNode.add(parsePrefExpr());
+			exprNode.add(parseMulExprRest());
+			return exprNode;
+		default:
+			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+		}
+	}
+	
+	private DerNode parsePrefExpr() {
+		DerNode exprNode = new DerNode(Nont.PrefExpr);
+		switch (currSymb.token) {
+		case LPARENTHESIS:
+		case IDENTIFIER:
+		case LBRACE:
+		case VOIDCONST:
+		case BOOLCONST:
+		case INTCONST:
+		case PTRCONST:
+		case STRCONST:
+		case CHARCONST:	
+			exprNode.add(parsePstfExpr());
+			return exprNode;
+		case ADD:
+			add(exprNode, Term.ADD, String.format("Expected symbol %s, but received %s.", Term.ADD, currSymb.token));
+			exprNode.add(parsePrefExpr());
+			return exprNode;
+		default:
+			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+		}
+	}
+	
+	private DerNode parsePstfExpr() {
+		DerNode exprNode = new DerNode(Nont.PstfExpr);
+		switch (currSymb.token) {
+		case LPARENTHESIS:
+		case IDENTIFIER:
+		case LBRACE:
+		case VOIDCONST:
+		case BOOLCONST:
+		case INTCONST:
+		case PTRCONST:
+		case STRCONST:
+		case CHARCONST:	
+			exprNode.add(parseCastExpr());
+			exprNode.add(parsePstfExprRest());
+			return exprNode;
+		default:
+			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+		}
+	}
+	
+	private DerNode parsePstfExprRest() {
+		DerNode exprNode = new DerNode(Nont.PstfExprRest);
+		switch (currSymb.token) {
+		case COLON:
+		case SEMIC:	
+		case RPARENTHESIS:
+		case ASSIGN:
+		case COMMA:
+		case RBRACKET:
+		case THEN:
+		case DO:
+		case WHERE:
+		case IOR:
+		case XOR:
+		case AND:		
+		case EQU:
+		case NEQ:
+		case LTH:
+		case GTH:
+		case GEQ:
+		case LEQ:
+		case ADD:
+		case SUB:
+		case MUL:
+		case DIV:
+		case MOD:
+			return exprNode;
+		case DOT:
+			add(exprNode, Term.DOT, String.format("Expected symbol %s, but received %s.", Term.DOT, currSymb.token));
+			add(exprNode, Term.IDENTIFIER, String.format("Expected symbol %s, but received %s.", Term.IDENTIFIER, currSymb.token));
+			return exprNode;
+		case LBRACKET:
+			add(exprNode, Term.LBRACKET, String.format("Expected symbol %s, but received %s.", Term.LBRACKET, currSymb.token));
+			exprNode.add(parseExpr());
+			add(exprNode, Term.RBRACKET, String.format("Expected symbol %s, but received %s.", Term.RBRACKET, currSymb.token));
+			return exprNode;
+		default:
+			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+		}
+	}
+	
+	private DerNode parseCastExpr() {
+		DerNode exprNode = new DerNode(Nont.CastExpr);
+		switch (currSymb.token) {
+		case IDENTIFIER:
+		case LBRACE:
+		case VOIDCONST:
+		case BOOLCONST:
+		case INTCONST:
+		case PTRCONST:
+		case STRCONST:
+		case CHARCONST:	
+			exprNode.add(parseAtomExpr());
+			return exprNode;
+		case LPARENTHESIS:
+			add(exprNode, Term.LPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.LPARENTHESIS, currSymb.token));
+			exprNode.add(parseExpr());
+			exprNode.add(parseCastEps());
+			return exprNode;
+		default:
+			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+		}
+	}
+	
+	private DerNode parseAtomExpr() {
+		DerNode exprNode = new DerNode(Nont.AtomExpr);
+		switch (currSymb.token) {
+		case IDENTIFIER:
+			add(exprNode, Term.LPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.LPARENTHESIS, currSymb.token));
+			exprNode.add(parseCallEps());
+			return exprNode;
+		case VOIDCONST:			
+			add(exprNode, Term.VOIDCONST, String.format("Expected symbol %s, but received %s.", Term.VOIDCONST, currSymb.token));
+			return exprNode;
+		case BOOLCONST:			
+			add(exprNode, Term.BOOLCONST, String.format("Expected symbol %s, but received %s.", Term.BOOLCONST, currSymb.token));
+			return exprNode;
+		case INTCONST:			
+			add(exprNode, Term.INTCONST, String.format("Expected symbol %s, but received %s.", Term.INTCONST, currSymb.token));
+			return exprNode;
+		case PTRCONST:			
+			add(exprNode, Term.PTRCONST, String.format("Expected symbol %s, but received %s.", Term.PTRCONST, currSymb.token));
+			return exprNode;
+		case STRCONST:			
+			add(exprNode, Term.STRCONST, String.format("Expected symbol %s, but received %s.", Term.STRCONST, currSymb.token));
+			return exprNode;
+		case CHARCONST:	
+			add(exprNode, Term.CHARCONST, String.format("Expected symbol %s, but received %s.", Term.CHARCONST, currSymb.token));
+			return exprNode;
+			
+		case LBRACE:
+			add(exprNode, Term.LBRACE, String.format("Expected symbol %s, but received %s.", Term.LBRACE, currSymb.token));
+			exprNode.add(parseStmt());
+			exprNode.add(parseStmts());
+			add(exprNode, Term.COLON, String.format("Expected symbol %s, but received %s.", Term.COLON, currSymb.token));
+			exprNode.add(parseExpr());
+			exprNode.add(parseWhereEps());
+			add(exprNode, Term.RBRACE, String.format("Expected symbol %s, but received %s.", Term.RBRACE, currSymb.token));
+			return exprNode;
+		default:
+			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+		}
+	}
+	
+	private DerNode parseCastEps() {
+		DerNode exprNode = new DerNode(Nont.CastEps);
+		switch (currSymb.token) {
+		case COLON: 
+			add(exprNode, Term.COLON, String.format("Expected symbol %s, but received %s.", Term.COLON, currSymb.token));
+			exprNode.add(parseType());
+			add(exprNode, Term.RPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.RPARENTHESIS, currSymb.token));
+			return exprNode;
+		case RPARENTHESIS:
+			add(exprNode, Term.RPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.RPARENTHESIS, currSymb.token));
+			return exprNode;
+		default:
+			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+		}
+	}
+	
+	private DerNode parseCallEps() {
+		DerNode exprNode = new DerNode(Nont.CallEps);
+		switch (currSymb.token) {
+		case COLON:
+		case SEMIC:	
+		case RPARENTHESIS:
+		case ASSIGN:
+		case COMMA:
+		case RBRACKET:
+		case THEN:
+		case DO:
+		case WHERE:
+		case IOR:
+		case XOR:
+		case AND:		
+		case EQU:
+		case NEQ:
+		case LTH:
+		case GTH:
+		case GEQ:
+		case LEQ:
+		case ADD:
+		case SUB:
+		case MUL:
+		case DIV:
+		case MOD:
+		case DOT:
+		case LBRACKET:
+			return exprNode;
+		case LPARENTHESIS:
+			add(exprNode, Term.LPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.LPARENTHESIS, currSymb.token));
+			exprNode.add(parseArgsFun());
+			add(exprNode, Term.RPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.RPARENTHESIS, currSymb.token));
+			return exprNode;
+		default:
+			throw new Report.Error(currSymb, String.format("Symbol %s (%s) not expected.", currSymb, currSymb.token));
+		}
+	}
 }
