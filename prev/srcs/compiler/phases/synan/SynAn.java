@@ -353,8 +353,8 @@ public class SynAn extends Phase {
 		case LPARENTHESIS:
 			return argsFunNode;
 		default:
-			add(parseExpr());
-			add(parseArgsFunRest());
+			argsFunNode.add(parseExpr());
+			argsFunNode.add(parseArgsFunRest());
 			return argsFunNode;
 		}
 	}
@@ -367,7 +367,7 @@ public class SynAn extends Phase {
 			argsFunNode.add(parseExpr());
 			argsFunNode.add(parseArgsFunRest());
 			return argsFunNode;		
-		case LPARENTHESIS:
+		case RPARENTHESIS:
 				return argsFunNode;
 		default:
 			throw new Report.Error(currSymb, String.format("[parseArgsFunRest] Symbol %s (%s) not expected.", currSymb, currSymb.token));
