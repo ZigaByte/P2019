@@ -259,7 +259,6 @@ public class SynAn extends Phase {
 		}
 	}
 	
-	// TODO: Think about using StmtsRest and have Stmts be the top one. Like in args
 	private DerNode parseStmt() {
 		DerNode stmtNode = new DerNode(Nont.Stmt);
 		switch (currSymb.token) {
@@ -270,6 +269,15 @@ public class SynAn extends Phase {
 			stmtNode.add(parseStmt());
 			stmtNode.add(parseStmts());
 			stmtNode.add(parseElse());
+			add(stmtNode, Term.END, String.format("Expected symbol %s, but received %s.", Term.END, currSymb.token));
+			add(stmtNode, Term.SEMIC, String.format("Expected symbol %s, but received %s.", Term.SEMIC, currSymb.token));
+			return stmtNode;
+		case WHILE: 
+			add(stmtNode, Term.WHILE, String.format("Expected symbol %s, but received %s.", Term.WHILE, currSymb.token));
+			stmtNode.add(parseExpr());
+			add(stmtNode, Term.DO, String.format("Expected symbol %s, but received %s.", Term.DO, currSymb.token));
+			stmtNode.add(parseStmt());
+			stmtNode.add(parseStmts());	
 			add(stmtNode, Term.END, String.format("Expected symbol %s, but received %s.", Term.END, currSymb.token));
 			add(stmtNode, Term.SEMIC, String.format("Expected symbol %s, but received %s.", Term.SEMIC, currSymb.token));
 			return stmtNode;
@@ -305,7 +313,7 @@ public class SynAn extends Phase {
 		case IDENTIFIER:
 		case LPARENTHESIS:
 		case IF:
-		case WHERE:
+		case WHILE:
 		case ADD:
 		case SUB:
 		case NOT:
@@ -637,6 +645,32 @@ public class SynAn extends Phase {
 		case SUB:
 			add(exprNode, Term.SUB, String.format("Expected symbol %s, but received %s.", Term.SUB, currSymb.token));
 			exprNode.add(parsePrefExpr());
+			return exprNode;
+		case NOT:
+			add(exprNode, Term.NOT, String.format("Expected symbol %s, but received %s.", Term.NOT, currSymb.token));
+			exprNode.add(parsePrefExpr());
+			return exprNode;
+		case DATA:
+			add(exprNode, Term.DATA, String.format("Expected symbol %s, but received %s.", Term.DATA, currSymb.token));
+			exprNode.add(parsePrefExpr());
+			return exprNode;
+		case ADDR:
+			add(exprNode, Term.ADDR, String.format("Expected symbol %s, but received %s.", Term.ADDR, currSymb.token));
+			exprNode.add(parsePrefExpr());
+			return exprNode;
+
+		case NEW:
+			add(exprNode, Term.NEW, String.format("Expected symbol %s, but received %s.", Term.NEW, currSymb.token));
+			add(exprNode, Term.LPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.LPARENTHESIS, currSymb.token));
+			exprNode.add(parseType());
+			add(exprNode, Term.RPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.RPARENTHESIS, currSymb.token));
+			return exprNode;
+
+		case DEL:
+			add(exprNode, Term.DEL, String.format("Expected symbol %s, but received %s.", Term.DEL, currSymb.token));
+			add(exprNode, Term.LPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.LPARENTHESIS, currSymb.token));
+			exprNode.add(parseExpr());
+			add(exprNode, Term.RPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.RPARENTHESIS, currSymb.token));
 			return exprNode;
 		default:
 			throw new Report.Error(currSymb, String.format("[parsePrefExpr] Symbol %s (%s) not expected.", currSymb, currSymb.token));
