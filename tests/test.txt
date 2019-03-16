@@ -1,1 +1,96 @@
-typ test222 : int;
+typ sasa : char;
+typ ziga : int;
+typ ziga : void;
+typ ziga : bool;
+typ ziga : arr[1] int;
+typ ziga : rec(sasa:char, ziga:int, test:bool);
+typ ziga : ptr int;
+typ ziga : ptr arr[1] int;
+typ ziga : sasa;
+typ ziga : (ziga);
+typ ziga : ptr arr[1] int;
+var ziga : sasa;
+var ziga : (ziga);
+
+fun sestej (x : int, y : int) : int = {
+	1;
+	rezultat = 1;
+	rezultat = 'a';
+	rezultat = true;
+	rezultat = false;
+	rezultat = none;
+	rezultat = !true;
+	rezultat = -1;
+	rezultat = +1;
+	rezultat = @1;
+	rezultat = $1;
+	rezultat = new(int);
+	rezultat = del(34);
+	rezultat = (hello);
+	rezultat = test;
+	rezultat = test(abc, 123);
+	rezultat = array[index];
+	rezultat = something.something_else;
+	rezultat = (something:int);
+	
+	1+2+3+4+5+6+7+8+9;
+	1+2*3+4+5+6+7+8+9;
+	1+2+3*4+5+6+7+8/!9;
+	1+2+3+4*5+6+7+8+9;
+	1+2+3*4*5*+7+8+9;
+	1==+3+4+5|6+7+8+9;
+	1+2!=+4+5+6+7+8+9;
+	1+2+3<=+5+7&8<=9;
+	1|2|3 >= (4 ^ 5) % 5;
+	
+	: rezultat
+};
+
+fun testFun () : char = {
+    sestej (ziga, sasa);
+
+	abc = 5 * 2 + 2 * 5; 
+	
+	if 2+2 == 3 then
+		if 2+2 == 3 then
+			if 2+2 == 3 then
+				if 2+2 == 3 then
+					none; 
+				else 
+					1; 
+				end; 
+			else 
+				1; 
+			end; 
+		else 
+			1; 
+		end; 
+	else 
+		1; 
+	end;
+	
+	while 2+3 <= 5 do
+		abc;
+		test;
+		if (test == 2) then
+			bla = 1 ^ 2;
+			while 2+3 <= 5 do
+				abc;
+				test;
+				if (test == 2) then
+					bla = 1 ^ 2;
+				end;
+			end;
+		else 
+			hello;
+		end;
+	end;
+	
+	: none
+};
+
+fun weird (aa:k, bb:l) : int = {
+	hello; :{a;:none} where
+		typ abc : int;
+		fun test (a:int) : int;
+};
