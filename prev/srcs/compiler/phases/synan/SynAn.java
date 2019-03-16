@@ -55,7 +55,7 @@ public class SynAn extends Phase {
 	/** The lookahead buffer (of length 1). */
 	private Symbol currSymb = null;
 
-	/**
+/*	*//**
 	 * Appends the current symbol in the lookahead buffer to a derivation tree node
 	 * (typically the node of the derivation tree that is currently being expanded
 	 * by the parser) and replaces the current symbol (just added) with the next
@@ -63,14 +63,14 @@ public class SynAn extends Phase {
 	 * 
 	 * @param node The node of the derivation tree currently being expanded by the
 	 *             parser.
-	 */
+	 *//*
 	private void add(DerNode node) {
 		if (currSymb == null)
 			throw new Report.InternalError();
 		node.add(new DerLeaf(currSymb));
 		currSymb = lexAn.lexer();
 	}
-
+*/
 	/**
 	 * If the current symbol is the expected terminal, appends the current symbol in
 	 * the lookahead buffer to a derivation tree node (typically the node of the
