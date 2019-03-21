@@ -100,19 +100,27 @@ public class SynAn extends Phase {
 		return node;
 	}
 
-	// decls -> decl declsRest
 	private DerNode parseDecls(){
 		DerNode declsNode = new DerNode(DerNode.Nont.Decls);
+		switch (currSymb.token) {
+			default:		
+				declsNode.add(parseDecl());
+				declsNode.add(parseDeclsRest());
+				return declsNode;
+		}
+	}
+	
+	private DerNode parseDeclsRest(){
+		DerNode declsNode = new DerNode(DerNode.Nont.DeclsRest);
 		switch (currSymb.token) {
 			case RBRACE:
 			case EOF:
 				return declsNode;
 			default:		
 				declsNode.add(parseDecl());
-				declsNode.add(parseDecls());
+				declsNode.add(parseDeclsRest());
 				return declsNode;
 		}
-
 	}
 
 	private DerNode parseDecl(){
