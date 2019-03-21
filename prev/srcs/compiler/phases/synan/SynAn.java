@@ -283,6 +283,7 @@ public class SynAn extends Phase {
 			return stmtNode;
 		case IDENTIFIER:
 		case LPARENTHESIS:
+		case LBRACE:
 		case ADD:
 		case SUB:
 		case NOT:
