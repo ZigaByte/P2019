@@ -367,7 +367,7 @@ public class SynAn extends Phase {
 	private DerNode parseArgsFun() {
 		DerNode argsFunNode = new DerNode(Nont.ArgsFun);
 		switch (currSymb.token) {
-		case LPARENTHESIS:
+		case RPARENTHESIS:
 			return argsFunNode;
 		default:
 			argsFunNode.add(parseExpr());
