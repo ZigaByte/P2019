@@ -146,7 +146,7 @@ public class SynAn extends Phase {
 				add(declNode, Term.FUN, String.format("Expected symbol %s, but received %s.", Term.FUN, currSymb.token));
 				add(declNode, Term.IDENTIFIER, String.format("Expected symbol %s, but received %s.", Term.IDENTIFIER, currSymb.token));
 				add(declNode, Term.LPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.LPARENTHESIS, currSymb.token));
-				declNode.add(parseArgs());
+				declNode.add(parseParDeclsEps());
 				add(declNode, Term.RPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.RPARENTHESIS, currSymb.token));
 				add(declNode, Term.COLON, String.format("Expected symbol %s, but received %s.", Term.COLON, currSymb.token));
 				declNode.add(parseType());
@@ -175,8 +175,8 @@ public class SynAn extends Phase {
 		}
 	}
 	
-	private DerNode parseArg() {
-		DerNode argNode = new DerNode(Nont.Arg);
+	private DerNode parseParDecl() {
+		DerNode argNode = new DerNode(Nont.ParDecl);
 		switch (currSymb.token) {
 		case IDENTIFIER:
 			add(argNode, Term.IDENTIFIER, String.format("Expected symbol %s, but received %s.", Term.IDENTIFIER, currSymb.token));
@@ -188,13 +188,13 @@ public class SynAn extends Phase {
 		}
 	}
 	
-	private DerNode parseArgsRest() {
-		DerNode argsNode = new DerNode(Nont.ArgsRest);
+	private DerNode parseParDeclRest() {
+		DerNode argsNode = new DerNode(Nont.ParDeclsRest);
 		switch (currSymb.token) {
 		case COMMA:
 			add(argsNode, Term.COMMA, String.format("Expected symbol %s, but received %s.", Term.COMMA, currSymb.token));
-			argsNode.add(parseArg());
-			argsNode.add(parseArgsRest());
+			argsNode.add(parseParDecl());
+			argsNode.add(parseParDeclRest());
 			return argsNode;
 		case RPARENTHESIS:
 			return argsNode;
@@ -203,12 +203,24 @@ public class SynAn extends Phase {
 		}
 	}
 	
-	private DerNode parseArgs() {
-		DerNode argsNode = new DerNode(Nont.Args);
+	private DerNode parseParDecls() {
+		DerNode argsNode = new DerNode(Nont.ParDecls);
 		switch (currSymb.token) {
 		case IDENTIFIER:
-			argsNode.add(parseArg());
-			argsNode.add(parseArgsRest());
+			argsNode.add(parseParDecl());
+			argsNode.add(parseParDeclRest());
+			return argsNode;
+		default:
+			throw new Report.Error(currSymb, String.format("[parseArgs] Symbol %s (%s) not expected.", currSymb, currSymb.token));
+		}
+	}
+	
+	private DerNode parseParDeclsEps() {
+		DerNode argsNode = new DerNode(Nont.ParDeclsEps);
+		switch (currSymb.token) {
+		case IDENTIFIER:
+			argsNode.add(parseParDecl());
+			argsNode.add(parseParDeclRest());
 			return argsNode;
 		case RPARENTHESIS:
 			return argsNode;
@@ -252,7 +264,7 @@ public class SynAn extends Phase {
 			case REC:{
 				add(typeNode, Term.REC, String.format("Expected symbol %s, but received %s.", Term.REC, currSymb.token));
 				add(typeNode, Term.LPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.LPARENTHESIS, currSymb.token));
-				typeNode.add(parseArgs());
+				typeNode.add(parseParDecls());
 				add(typeNode, Term.RPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.RPARENTHESIS, currSymb.token));
 				
 				return typeNode;
