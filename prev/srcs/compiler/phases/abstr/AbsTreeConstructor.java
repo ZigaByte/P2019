@@ -7,7 +7,6 @@ import java.util.*;
 import compiler.common.report.*;
 import compiler.data.dertree.*;
 import compiler.data.dertree.visitor.*;
-import compiler.data.symbol.Symbol;
 import compiler.data.abstree.*;
 import compiler.data.abstree.AbsAtomType.Type;
 
@@ -57,13 +56,16 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 		case Decl: {
 			DerLeaf nodeType = ((DerLeaf)node.subtree(0));
 			switch (nodeType.symb.token) {
-			case TYP:
+			case TYP:{
 				AbsType type = (AbsType) node.subtree(3).accept(this, null);
 				String name = ((DerLeaf)(node.subtree(1))).symb.lexeme;
 				return new AbsTypDecl(new Location(type, type), name, type);
-			case VAR:
-				//TODO
-				break;
+			}
+			case VAR:{
+				AbsType type = (AbsType) node.subtree(3).accept(this, null);
+				String name = ((DerLeaf)(node.subtree(1))).symb.lexeme;
+				return new AbsVarDecl(new Location(type, type), name, type);
+			}
 			case FUN:
 				//TODO
 				break;
@@ -89,6 +91,11 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 				return new AbsArrType(new Location(node, node), expr, type);
 			}
 			// TODO Rec
+			//case REC:{
+				//AbsParDecls params = (AbsParDecls) node.subtree(2).accept(this, null);
+				//return new AbsRecType(new Location(node, node), compDecls);
+				//TODO WHAT HERE?
+			//}
 			
 			case PTR: {
 				AbsType type = (AbsType) node.subtree(1).accept(this, null);
