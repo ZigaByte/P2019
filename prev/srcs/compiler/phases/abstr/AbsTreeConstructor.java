@@ -67,8 +67,10 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 				return new AbsVarDecl(new Location(type, type), name, type);
 			}
 			case FUN:
-				//TODO
-				break;
+				String name = ((DerLeaf)(node.subtree(1))).symb.lexeme;
+				AbsParDecls parDecls = (AbsParDecls) node.subtree(3).accept(this, null);
+				AbsType type = (AbsType) node.subtree(6).accept(this, null);
+				return new AbsFunDecl(new Location(node), name, parDecls, type);
 			default:
 				System.out.println("Something went wrong");
 			}
@@ -90,12 +92,10 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 				AbsType type = (AbsType) node.subtree(4).accept(this, null);
 				return new AbsArrType(new Location(node, node), expr, type);
 			}
-			// TODO Rec
-			//case REC:{
-				//AbsParDecls params = (AbsParDecls) node.subtree(2).accept(this, null);
-				//return new AbsRecType(new Location(node, node), compDecls);
-				//TODO WHAT HERE?
-			//}
+			case REC:{
+				AbsCompDecls params = (AbsCompDecls) node.subtree(2).accept(this, null);
+				return new AbsRecType(new Location(node, node), params);
+			}
 			
 			case PTR: {
 				AbsType type = (AbsType) node.subtree(1).accept(this, null);
@@ -112,8 +112,71 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 			default:
 				return new AbsAtomType(new Location(node, node), Type.INT);
 			}
-			
+		}		
+		case CompDecls:{
+			Vector<AbsCompDecl> allDecls = new Vector<AbsCompDecl>();
+			AbsCompDecl decl = (AbsCompDecl) node.subtree(0).accept(this, null);
+			allDecls.add(decl);
+			AbsCompDecls decls = (AbsCompDecls) node.subtree(1).accept(this, null);
+			if (decls != null)
+				allDecls.addAll(decls.compDecls());
+			return new AbsCompDecls(new Location(decl, decls == null ? decl : decls), allDecls);
 		}
+		case CompDecl:{
+			String name = ((DerLeaf)(node.subtree(0))).symb.lexeme;
+			AbsType type = (AbsType) node.subtree(2).accept(this, null);
+			return new AbsCompDecl(new Location(node),  name, type);
+		}
+		case CompDeclsRest:{
+			if (node.numSubtrees() == 0)
+				return null;
+			Vector<AbsCompDecl> allDecls = new Vector<AbsCompDecl>();
+			AbsCompDecl decl = (AbsCompDecl) node.subtree(1).accept(this, null);
+			allDecls.add(decl);
+			AbsCompDecls decls = (AbsCompDecls) node.subtree(2).accept(this, null);
+			if (decls != null)
+				allDecls.addAll(decls.compDecls());
+			return new AbsCompDecls(new Location(decl, decls == null ? decl : decls), allDecls);
+		}
+		
+		case ParDecls:{
+			Vector<AbsParDecl> allDecls = new Vector<AbsParDecl>();
+			AbsParDecl decl = (AbsParDecl) node.subtree(0).accept(this, null);
+			allDecls.add(decl);
+			AbsParDecls decls = (AbsParDecls) node.subtree(1).accept(this, null);
+			if (decls != null)
+				allDecls.addAll(decls.parDecls());
+			return new AbsParDecls(new Location(decl, decls == null ? decl : decls), allDecls);
+		}
+		case ParDecl:{
+			String name = ((DerLeaf)(node.subtree(0))).symb.lexeme;
+			AbsType type = (AbsType) node.subtree(2).accept(this, null);
+			return new AbsParDecl(new Location(node),  name, type);
+		}
+		case ParDeclsRest:{
+			if (node.numSubtrees() == 0)
+				return null;
+			Vector<AbsParDecl> allDecls = new Vector<AbsParDecl>();
+			AbsParDecl decl = (AbsParDecl) node.subtree(1).accept(this, null);
+			allDecls.add(decl);
+			AbsParDecls decls = (AbsParDecls) node.subtree(2).accept(this, null);
+			if (decls != null)
+				allDecls.addAll(decls.parDecls());
+			return new AbsParDecls(new Location(decl, decls == null ? decl : decls), allDecls);
+		}
+		
+		case ParDeclsEps:{
+			if (node.numSubtrees() == 0)
+				return new AbsParDecls(new Location(1,1,1,1), new Vector<AbsParDecl>());;
+			Vector<AbsParDecl> allDecls = new Vector<AbsParDecl>();
+			AbsParDecl decl = (AbsParDecl) node.subtree(0).accept(this, null);
+			allDecls.add(decl);
+			AbsParDecls decls = (AbsParDecls) node.subtree(1).accept(this, null);
+			if (decls != null)
+				allDecls.addAll(decls.parDecls());
+			return new AbsParDecls(new Location(decl, decls == null ? decl : decls), allDecls);
+		}
+		
 		case Expr:{
 			return new AbsAtomExpr(new Location(node,node ), AbsAtomExpr.Type.INT, "TODO");
 		}
