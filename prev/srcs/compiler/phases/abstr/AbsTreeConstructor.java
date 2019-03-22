@@ -73,12 +73,45 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 		}
 		
 		case Type:{
-			return new AbsAtomType(new Location(node, node), Type.INT);
+			// Switch between different types of type
+			switch (((DerLeaf)(node.subtree(0))).symb.token) {
+			case VOID:
+				return new AbsAtomType(new Location(node, node), Type.VOID);
+			case BOOL:
+				return new AbsAtomType(new Location(node, node), Type.BOOL);
+			case CHAR:
+				return new AbsAtomType(new Location(node, node), Type.CHAR);
+			case INT:
+				return new AbsAtomType(new Location(node, node), Type.INT);
+			case ARR: {
+				AbsExpr expr = (AbsExpr) node.subtree(2).accept(this, null);
+				AbsType type = (AbsType) node.subtree(4).accept(this, null);
+				return new AbsArrType(new Location(node, node), expr, type);
+			}
+			// TODO Rec
+			
+			case PTR: {
+				AbsType type = (AbsType) node.subtree(1).accept(this, null);
+				return new AbsPtrType(new Location(node,node), type);
+			}
+			case IDENTIFIER:{
+				String name = ((DerLeaf)(node.subtree(0))).symb.lexeme;
+				return new AbsTypName(new Location(node, node), name);
+			}
+			case LPARENTHESIS:{
+				return node.subtree(1).accept(this, null);
+			}
+			
+			default:
+				return new AbsAtomType(new Location(node, node), Type.INT);
+			}
+			
+		}
+		case Expr:{
+			return new AbsAtomExpr(new Location(node,node ), AbsAtomExpr.Type.INT, "TODO");
 		}
 		
-		case Stmts:{
-			Vector<AbsStmt> allStmts = new Vector<AbsStmt>();
-		}
+		
 		default: System.out.println(node.label);
 		}
 		return null;
