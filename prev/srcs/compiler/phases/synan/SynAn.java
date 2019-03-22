@@ -376,25 +376,31 @@ public class SynAn extends Phase {
 		}
 	}
 
-	private DerNode parseArgsFun() {
-		DerNode argsFunNode = new DerNode(Nont.ArgsFun);
+	private DerNode parseArg() {
+		DerNode argsFunNode = new DerNode(Nont.Arg);
+		argsFunNode.add(parseExpr());
+		return argsFunNode;
+	}
+	
+	private DerNode parseArgsEps() {
+		DerNode argsFunNode = new DerNode(Nont.ArgsEps);
 		switch (currSymb.token) {
 		case RPARENTHESIS:
 			return argsFunNode;
 		default:
-			argsFunNode.add(parseExpr());
-			argsFunNode.add(parseArgsFunRest());
+			argsFunNode.add(parseArg());
+			argsFunNode.add(parseArgsRest());
 			return argsFunNode;
 		}
 	}
 	
-	private DerNode parseArgsFunRest() {
-		DerNode argsFunNode = new DerNode(Nont.ArgsFunRest);
+	private DerNode parseArgsRest() {
+		DerNode argsFunNode = new DerNode(Nont.ArgsRest);
 		switch (currSymb.token) {
 		case COMMA:
 			add(argsFunNode, Term.COMMA, String.format("Expected symbol %s, but received %s.", Term.COMMA, currSymb.token));
-			argsFunNode.add(parseExpr());
-			argsFunNode.add(parseArgsFunRest());
+			argsFunNode.add(parseArg());
+			argsFunNode.add(parseArgsRest());
 			return argsFunNode;		
 		case RPARENTHESIS:
 				return argsFunNode;
@@ -871,7 +877,7 @@ public class SynAn extends Phase {
 			return exprNode;
 		case LPARENTHESIS:
 			add(exprNode, Term.LPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.LPARENTHESIS, currSymb.token));
-			exprNode.add(parseArgsFun());
+			exprNode.add(parseArgsEps());
 			add(exprNode, Term.RPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.RPARENTHESIS, currSymb.token));
 			return exprNode;
 		default:
