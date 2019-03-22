@@ -175,8 +175,9 @@ public class SynAn extends Phase {
 		}
 	}
 	
-	private DerNode parseParDecl() {
+	private DerNode parseParDecl(boolean rec) {
 		DerNode argNode = new DerNode(Nont.ParDecl);
+		if(rec) argNode = new DerNode(Nont.CompDecl);
 		switch (currSymb.token) {
 		case IDENTIFIER:
 			add(argNode, Term.IDENTIFIER, String.format("Expected symbol %s, but received %s.", Term.IDENTIFIER, currSymb.token));
@@ -188,13 +189,14 @@ public class SynAn extends Phase {
 		}
 	}
 	
-	private DerNode parseParDeclRest() {
+	private DerNode parseParDeclRest(boolean rec) {
 		DerNode argsNode = new DerNode(Nont.ParDeclsRest);
+		if(rec) argsNode = new DerNode(Nont.CompDeclsRest);
 		switch (currSymb.token) {
 		case COMMA:
 			add(argsNode, Term.COMMA, String.format("Expected symbol %s, but received %s.", Term.COMMA, currSymb.token));
-			argsNode.add(parseParDecl());
-			argsNode.add(parseParDeclRest());
+			argsNode.add(parseParDecl(rec));
+			argsNode.add(parseParDeclRest(rec));
 			return argsNode;
 		case RPARENTHESIS:
 			return argsNode;
@@ -203,12 +205,13 @@ public class SynAn extends Phase {
 		}
 	}
 	
-	private DerNode parseParDecls() {
+	private DerNode parseParDecls(boolean rec) {
 		DerNode argsNode = new DerNode(Nont.ParDecls);
+		if(rec) argsNode = new DerNode(Nont.CompDecls);
 		switch (currSymb.token) {
 		case IDENTIFIER:
-			argsNode.add(parseParDecl());
-			argsNode.add(parseParDeclRest());
+			argsNode.add(parseParDecl(rec));
+			argsNode.add(parseParDeclRest(rec));
 			return argsNode;
 		default:
 			throw new Report.Error(currSymb, String.format("[parseArgs] Symbol %s (%s) not expected.", currSymb, currSymb.token));
@@ -219,8 +222,9 @@ public class SynAn extends Phase {
 		DerNode argsNode = new DerNode(Nont.ParDeclsEps);
 		switch (currSymb.token) {
 		case IDENTIFIER:
-			argsNode.add(parseParDecl());
-			argsNode.add(parseParDeclRest());
+			// We know we are in a function parameters
+			argsNode.add(parseParDecl(false));
+			argsNode.add(parseParDeclRest(false));
 			return argsNode;
 		case RPARENTHESIS:
 			return argsNode;
@@ -264,7 +268,7 @@ public class SynAn extends Phase {
 			case REC:{
 				add(typeNode, Term.REC, String.format("Expected symbol %s, but received %s.", Term.REC, currSymb.token));
 				add(typeNode, Term.LPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.LPARENTHESIS, currSymb.token));
-				typeNode.add(parseParDecls());
+				typeNode.add(parseParDecls(true));
 				add(typeNode, Term.RPARENTHESIS, String.format("Expected symbol %s, but received %s.", Term.RPARENTHESIS, currSymb.token));
 				
 				return typeNode;

@@ -30,8 +30,11 @@ public class DerNode extends DerTree {
 		DisjExpr, DisjExprRest, ConjExpr, ConjExprRest, RelExpr, RelExprRest, AddExpr, AddExprRest, MulExpr,
 		MulExprRest, PrefExpr, PstfExpr, PstfExprRest, AtomExpr, CastExpr,
 		
-		ParDeclsEps, ParDecls, ParDeclsRest, ParDecl, BodyEps,  CompDecls, CompDeclsRest, CompDecl,
-		 CallEps, CastEps,
+		ParDeclsEps, 
+		ParDecls, ParDeclsRest, ParDecl, 
+		CompDecls, CompDeclsRest, CompDecl,
+		BodyEps,  
+		CallEps, CastEps,
 		WhereEps,  AssignEps, ElseEps,
 	};
 
