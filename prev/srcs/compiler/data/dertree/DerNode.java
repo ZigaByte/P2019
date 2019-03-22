@@ -25,7 +25,7 @@ public class DerNode extends DerTree {
 		Stmts, StmtsRest, Stmt,
 		
 		Type, Expr, Identifier, 
-		ArgsEps, Arg, ArgsRest, // Declaration arguments
+		ArgsEps, Arg, ArgsRest,
 		
 		DisjExpr, DisjExprRest, ConjExpr, ConjExprRest, RelExpr, RelExprRest, AddExpr, AddExprRest, MulExpr,
 		MulExprRest, PrefExpr, PstfExpr, PstfExprRest, AtomExpr, CastExpr,
