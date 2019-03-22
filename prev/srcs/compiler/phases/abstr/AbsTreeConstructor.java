@@ -70,8 +70,13 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 				String name = ((DerLeaf)(node.subtree(1))).symb.lexeme;
 				AbsParDecls parDecls = (AbsParDecls) node.subtree(3).accept(this, null);
 				AbsType type = (AbsType) node.subtree(6).accept(this, null);
-				return new AbsFunDecl(new Location(node), name, parDecls, type);
-			default:
+				if(((DerNode)node.subtree(7)).numSubtrees() == 0) {
+					return new AbsFunDecl(new Location(node), name, parDecls, type);
+				}
+				AbsExpr expr = (AbsExpr) node.subtree(7).accept(this, null);
+				return new AbsFunDef(new Location(node), name, parDecls, type, expr);
+				
+				default:
 				System.out.println("Something went wrong");
 			}
 		}
@@ -175,6 +180,10 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 			if (decls != null)
 				allDecls.addAll(decls.parDecls());
 			return new AbsParDecls(new Location(decl, decls == null ? decl : decls), allDecls);
+		}
+		
+		case BodyEps:{
+			return node.subtree(1).accept(this, null);
 		}
 		
 		case Expr:{
