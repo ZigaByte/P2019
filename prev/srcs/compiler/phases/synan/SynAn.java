@@ -175,6 +175,21 @@ public class SynAn extends Phase {
 		}
 	}
 	
+
+	private DerNode parseAssign() {
+		DerNode bodyNode = new DerNode(DerNode.Nont.AssignEps);
+		switch (currSymb.token) {
+		case SEMIC:
+			return bodyNode;
+		case ASSIGN:
+			add(bodyNode, Term.ASSIGN, String.format("Expected symbol %s, but received %s.", Term.ASSIGN, currSymb.token));
+			bodyNode.add(parseExpr());
+			return bodyNode;
+		default:
+			throw new Report.Error(currSymb, String.format("[parseBody] Symbol %s not expected.", currSymb));
+		}
+	}
+	
 	private DerNode parseParDecl(boolean rec) {
 		DerNode argNode = new DerNode(Nont.ParDecl);
 		if(rec) argNode = new DerNode(Nont.CompDecl);
@@ -322,7 +337,7 @@ public class SynAn extends Phase {
 		case STRCONST:
 		case CHARCONST:
 			stmtNode.add(parseExpr());
-			stmtNode.add(parseBody());
+			stmtNode.add(parseAssign());
 			add(stmtNode, Term.SEMIC, String.format("Expected symbol %s, but received %s.", Term.SEMIC, currSymb.token));
 			return stmtNode;
 			
@@ -419,7 +434,7 @@ public class SynAn extends Phase {
 		case WHERE:
 			add(whereEpsNode, Term.WHERE, String.format("Expected symbol %s, but received %s.", Term.WHERE, currSymb.token));
 			whereEpsNode.add(parseDecl());
-			whereEpsNode.add(parseDecls());
+			whereEpsNode.add(parseDeclsRest());
 			return whereEpsNode;		
 		case RBRACE:
 			return whereEpsNode;

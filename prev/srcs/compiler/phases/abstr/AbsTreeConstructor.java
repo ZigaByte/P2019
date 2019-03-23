@@ -46,8 +46,9 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 		}
 
 		case DeclsRest: {
-			if (node.numSubtrees() == 0)
-				return null;
+			if (node.numSubtrees() == 0) {
+				return new AbsDecls(new Location(1,1,1,1), new Vector<AbsDecl>());
+			}
 			Vector<AbsDecl> allDecls = new Vector<AbsDecl>();
 			AbsDecl decl = (AbsDecl) node.subtree(0).accept(this, null);
 			allDecls.add(decl);
@@ -416,8 +417,55 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 				return new AbsAtomExpr(new Location(node), AbsAtomExpr.Type.VOID, ((DerLeaf)node.subtree(0)).symb.lexeme);
 			case PTRCONST:
 				return new AbsAtomExpr(new Location(node), AbsAtomExpr.Type.PTR, ((DerLeaf)node.subtree(0)).symb.lexeme);
+			case LBRACE:
+				Vector<AbsStmt> stmts = new Vector<AbsStmt>();
+				stmts.add((AbsStmt)node.subtree(1).accept(this, null));
+				stmts.addAll(((AbsStmts)node.subtree(2).accept(this, null)).stmts());
+				
+				AbsExpr expr = (AbsExpr) node.subtree(4).accept(this, null);
+				AbsDecls decls = (AbsDecls) node.subtree(5).accept(this, null);
+				
+				return new AbsBlockExpr(new Location(node), decls, new AbsStmts(new Location(node), stmts), expr);
+			
 			default: System.out.println("Something went wrong");;
 			}
+		}
+		case Stmts:{
+			if(node.numSubtrees() == 0) {
+				return new AbsStmts(new Location(1,1,1,1), new Vector<AbsStmt>());
+			}
+			Vector<AbsStmt> stmts = new Vector<AbsStmt>();
+			stmts.add((AbsStmt)node.subtree(0).accept(this, null));
+			stmts.addAll(((AbsStmts)node.subtree(1).accept(this, null)).stmts());
+			return new AbsStmts(new Location(node), stmts);
+		}
+		
+		case Stmt:{
+			AbsExpr expr = (AbsExpr)node.subtree(0).accept(this, null);
+			
+			return node.subtree(1).accept(this, expr);
+			
+			// TODO IF AND WHEN
+			
+			
+		}
+		
+		case AssignEps:{
+			if(node.numSubtrees() == 0) {
+				return new AbsExprStmt(new Location(1,1,1,1), (AbsExpr)visArg);
+			}
+			AbsExpr expr = (AbsExpr) node.subtree(1).accept(this, null);
+			return new AbsAssignStmt(new Location(node), (AbsExpr)visArg, expr);
+		}
+		
+		case WhereEps:{
+			if(node.numSubtrees() == 0) {
+				return new AbsDecls(new Location(1,1,1,1), new Vector<AbsDecl>());
+			}
+			Vector<AbsDecl> decls = new Vector<AbsDecl>();
+			decls.add((AbsDecl)node.subtree(1).accept(this, null));
+			decls.addAll(((AbsDecls)node.subtree(2).accept(this, null)).decls());
+			return new AbsDecls(new Location(node), decls);
 		}
 		
 		case CallEps:{
@@ -459,3 +507,4 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 		return null;
 	}
 }
+
