@@ -319,7 +319,69 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 		}
 		
 		case PrefExpr:{
-			return new AbsAtomExpr(new Location(node), AbsAtomExpr.Type.INT, "TODO");			
+			if(node.numSubtrees() == 1) {
+				return node.subtree(0).accept(this, null);
+			}
+			if(node.numSubtrees() == 2) {
+				AbsUnExpr.Oper operation = AbsUnExpr.Oper.NOT;
+				switch(((DerLeaf)node.subtree(0)).symb.token) {
+					case NOT:
+						operation = AbsUnExpr.Oper.NOT;
+						break;
+					case ADD:
+						operation = AbsUnExpr.Oper.ADD;
+						break;
+					case SUB:
+						operation = AbsUnExpr.Oper.SUB;
+						break;
+					case ADDR:
+						operation = AbsUnExpr.Oper.ADDR;
+						break;
+					case DATA:
+						operation = AbsUnExpr.Oper.DATA;
+						break;
+					default: System.out.println("Something went wrong");
+				}
+				AbsExpr expr = (AbsExpr)node.subtree(1).accept(this, null);
+				return new AbsUnExpr(new Location(node), operation, expr);
+			} else {
+				switch(((DerLeaf)node.subtree(0)).symb.token) {
+				case NEW:
+					AbsType type = (AbsType) node.subtree(2).accept(this, null); 
+					return new AbsNewExpr(new Location(node), type);
+				case DEL:
+					AbsExpr expr = (AbsExpr) node.subtree(2).accept(this, null); 
+					return new AbsDelExpr(new Location(node), expr);
+				default: System.out.println("Something wrong?");
+				}
+			}
+		}
+		
+		case PstfExpr:{
+			AbsExpr expr = (AbsExpr) node.subtree(0).accept(this, null);
+			return node.subtree(1).accept(this, expr);
+		}
+		
+		case PstfExprRest:{
+			if(node.numSubtrees() == 0) {
+				return visArg;
+			}
+			switch (((DerLeaf)node.subtree(0)).symb.token) {
+			case LBRACKET:
+				AbsExpr index = (AbsExpr) node.subtree(1).accept(this, null);
+				return new AbsArrExpr(new Location(node), (AbsExpr) visArg, index);
+
+			case DOT:
+				String name = ((DerLeaf)node.subtree(1)).symb.lexeme;
+				AbsVarName comp = new AbsVarName(new Location(node), name);
+				return new AbsRecExpr(new Location(node), (AbsExpr) visArg, comp);
+			default:
+				break;
+			}
+		}
+		
+		case CastExpr:{
+			return new AbsAtomExpr(new Location(node), AbsAtomExpr.Type.INT, "TODO");
 		}
 		
 		default: System.out.println(node.label);
