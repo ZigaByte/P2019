@@ -381,7 +381,42 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 		}
 		
 		case CastExpr:{
-			return new AbsAtomExpr(new Location(node), AbsAtomExpr.Type.INT, "TODO");
+			if(node.numSubtrees() == 1) {
+				return node.subtree(0).accept(this, null);
+			}
+			AbsExpr expr = (AbsExpr) node.subtree(1).accept(this, null);
+			return node.subtree(2).accept(this, expr);
+		}
+		
+		case CastEps:{
+			if(node.numSubtrees() <= 1) {
+				return visArg;
+			}
+			AbsType type = (AbsType) node.subtree(1).accept(this, null);
+			return new AbsCastExpr(new Location(node), (AbsExpr) visArg, type);
+		}
+		
+		case AtomExpr:{
+			switch(((DerLeaf)node.subtree(0)).symb.token) {
+			case IDENTIFIER:
+	
+				break;
+			case INTCONST:
+				return new AbsAtomExpr(new Location(node), AbsAtomExpr.Type.INT, ((DerLeaf)node.subtree(0)).symb.lexeme);
+			case CHARCONST:
+				return new AbsAtomExpr(new Location(node), AbsAtomExpr.Type.CHAR, ((DerLeaf)node.subtree(0)).symb.lexeme);
+			case BOOLCONST:
+				return new AbsAtomExpr(new Location(node), AbsAtomExpr.Type.BOOL, ((DerLeaf)node.subtree(0)).symb.lexeme);
+			case STRCONST:
+				return new AbsAtomExpr(new Location(node), AbsAtomExpr.Type.STR, ((DerLeaf)node.subtree(0)).symb.lexeme);
+			case VOIDCONST:
+				return new AbsAtomExpr(new Location(node), AbsAtomExpr.Type.VOID, ((DerLeaf)node.subtree(0)).symb.lexeme);
+			case PTRCONST:
+				return new AbsAtomExpr(new Location(node), AbsAtomExpr.Type.PTR, ((DerLeaf)node.subtree(0)).symb.lexeme);
+			default: System.out.println("Something went wrong");;
+			}
+			
+			
 		}
 		
 		default: System.out.println(node.label);
