@@ -5,6 +5,8 @@ package compiler.phases.abstr;
 
 import java.util.*;
 
+import com.sun.org.apache.xpath.internal.Arg;
+
 import compiler.common.report.*;
 import compiler.data.dertree.*;
 import compiler.data.dertree.visitor.*;
@@ -399,8 +401,9 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 		case AtomExpr:{
 			switch(((DerLeaf)node.subtree(0)).symb.token) {
 			case IDENTIFIER:
-	
-				break;
+				String name = ((DerLeaf)node.subtree(0)).symb.lexeme;
+				AbsVarName varName = new AbsVarName(new Location(node), name);
+				return node.subtree(1).accept(this, varName);
 			case INTCONST:
 				return new AbsAtomExpr(new Location(node), AbsAtomExpr.Type.INT, ((DerLeaf)node.subtree(0)).symb.lexeme);
 			case CHARCONST:
@@ -415,12 +418,44 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 				return new AbsAtomExpr(new Location(node), AbsAtomExpr.Type.PTR, ((DerLeaf)node.subtree(0)).symb.lexeme);
 			default: System.out.println("Something went wrong");;
 			}
-			
-			
 		}
 		
+		case CallEps:{
+			if(node.numSubtrees() == 0) {
+				return visArg;
+			}
+			// Else it's a function call
+			AbsArgs args = (AbsArgs) node.subtree(1).accept(this, null);
+			AbsFunName fun = new AbsFunName(new Location(node), ((AbsVarName)visArg).name, args);
+			return fun;
+		}
+		
+		case ArgsEps:{
+			if(node.numSubtrees() == 0) {
+				return new AbsArgs(new Location(1,1,1,1), new Vector<AbsExpr>());
+			}
+			Vector<AbsExpr> exprs = new Vector<AbsExpr>();
+			exprs.add((AbsExpr)node.subtree(0).accept(this, null));
+			exprs.addAll(((AbsArgs)node.subtree(1).accept(this, null)).args());
+			
+			return new AbsArgs(new Location(node), exprs);
+		}
+		case ArgsRest:{
+			if(node.numSubtrees() == 0) {
+				return new AbsArgs(new Location(1,1,1,1), new Vector<AbsExpr>());
+			}
+			Vector<AbsExpr> exprs = new Vector<AbsExpr>();
+			exprs.add((AbsExpr)node.subtree(1).accept(this, null));
+			exprs.addAll(((AbsArgs)node.subtree(2).accept(this, null)).args());
+			
+			return new AbsArgs(new Location(node), exprs);
+		}
+		case Arg:{
+			return node.subtree(0).accept(this, null);
+		}
 		default: System.out.println(node.label);
 		}
+		
 		return null;
 	}
 }
