@@ -4,11 +4,13 @@
 package compiler.phases.abstr;
 
 import java.util.*;
+
 import compiler.common.report.*;
 import compiler.data.dertree.*;
 import compiler.data.dertree.visitor.*;
 import compiler.data.abstree.*;
 import compiler.data.abstree.AbsAtomType.Type;
+import compiler.data.abstree.AbsBinExpr.Oper;
 
 /**
  * Transforms a derivation tree to an abstract syntax tree.
@@ -187,9 +189,138 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 		}
 		
 		case Expr:{
-			return new AbsAtomExpr(new Location(node,node ), AbsAtomExpr.Type.INT, "TODO");
+			return node.subtree(0).accept(this, null);
+		}
+		case DisjExpr:{
+			AbsExpr fstExpr = (AbsExpr) node.subtree(0).accept(this, null);
+			return node.subtree(1).accept(this, fstExpr);
 		}
 		
+		case DisjExprRest:{
+			if(node.numSubtrees() == 0) {
+				return visArg;
+			}
+			Oper operation = Oper.ADD;
+			switch(((DerLeaf)node.subtree(0)).symb.token) {
+				case IOR:
+					operation = Oper.IOR;
+					break;
+				case XOR:
+					operation = Oper.XOR;
+					break;
+				default: System.out.println("Something went wrong");
+			}
+			AbsExpr sndExpr = (AbsExpr) node.subtree(1).accept(this, null);
+			
+			AbsBinExpr binExpr = new AbsBinExpr(new Location(node), operation, (AbsExpr) visArg, sndExpr);
+			return node.subtree(2).accept(this, binExpr);
+		}
+		
+		case ConjExpr:{
+			AbsExpr fstExpr = (AbsExpr) node.subtree(0).accept(this, null);
+			return node.subtree(1).accept(this, fstExpr);
+		}
+		
+		case ConjExprRest:{
+			if(node.numSubtrees() == 0) {
+				return visArg;
+			}
+			AbsExpr sndExpr = (AbsExpr) node.subtree(1).accept(this, null);
+			
+			AbsBinExpr binExpr = new AbsBinExpr(new Location(node), Oper.AND, (AbsExpr) visArg, sndExpr);
+			return node.subtree(2).accept(this, binExpr);
+		}
+		
+		case RelExpr:{
+			AbsExpr fstExpr = (AbsExpr) node.subtree(0).accept(this, null);
+			return node.subtree(1).accept(this, fstExpr);
+		}
+		
+		case RelExprRest:{
+			if(node.numSubtrees() == 0) {
+				return visArg;
+			}
+			Oper operation = Oper.ADD;
+			switch(((DerLeaf)node.subtree(0)).symb.token) {
+				case EQU:
+					operation = Oper.EQU;
+					break;
+				case GTH:
+					operation = Oper.GTH;
+					break;
+				case NEQ:
+					operation = Oper.NEQ;
+					break;
+				case LTH:
+					operation = Oper.LTH;
+					break;
+				case LEQ:
+					operation = Oper.LEQ;
+					break;
+				case GEQ:
+					operation = Oper.GEQ;
+					break;
+				default: System.out.println("Something went wrong");
+			}
+			AbsExpr sndExpr = (AbsExpr) node.subtree(1).accept(this, null);
+			return new AbsBinExpr(new Location(node), operation, (AbsExpr) visArg, sndExpr);
+		}
+		case AddExpr:{
+			AbsExpr fstExpr = (AbsExpr) node.subtree(0).accept(this, null);
+			return node.subtree(1).accept(this, fstExpr);
+		}
+		
+		case AddExprRest:{
+			if(node.numSubtrees() == 0) {
+				return visArg;
+			}
+			Oper operation = Oper.ADD;
+			switch(((DerLeaf)node.subtree(0)).symb.token) {
+				case ADD:
+					operation = Oper.ADD;
+					break;
+				case SUB:
+					operation = Oper.SUB;
+					break;
+				default: System.out.println("Something went wrong");
+			}
+			AbsExpr sndExpr = (AbsExpr) node.subtree(1).accept(this, null);
+			
+			AbsBinExpr binExpr = new AbsBinExpr(new Location(node), operation, (AbsExpr) visArg, sndExpr);
+			return node.subtree(2).accept(this, binExpr);
+		}
+		
+		case MulExpr:{
+			AbsExpr fstExpr = (AbsExpr) node.subtree(0).accept(this, null);
+			return node.subtree(1).accept(this, fstExpr);
+		}
+		
+		case MulExprRest:{
+			if(node.numSubtrees() == 0) {
+				return visArg;
+			}
+			Oper operation = Oper.MUL;
+			switch(((DerLeaf)node.subtree(0)).symb.token) {
+				case MUL:
+					operation = Oper.MUL;
+					break;
+				case DIV:
+					operation = Oper.DIV;
+					break;
+				case MOD:
+					operation = Oper.MOD;
+					break;
+				default: System.out.println("Something went wrong");
+			}
+			AbsExpr sndExpr = (AbsExpr) node.subtree(1).accept(this, null);
+			
+			AbsBinExpr binExpr = new AbsBinExpr(new Location(node), operation, (AbsExpr) visArg, sndExpr);
+			return node.subtree(2).accept(this, binExpr);
+		}
+		
+		case PrefExpr:{
+			return new AbsAtomExpr(new Location(node), AbsAtomExpr.Type.INT, "TODO");			
+		}
 		
 		default: System.out.println(node.label);
 		}
