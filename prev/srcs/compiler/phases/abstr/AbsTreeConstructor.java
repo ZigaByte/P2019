@@ -441,13 +441,42 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 		}
 		
 		case Stmt:{
+			if(node.subtree(0) instanceof DerLeaf) {
+				switch (((DerLeaf)node.subtree(0)).symb.token) {
+				case IF:{
+					AbsExpr cond = (AbsExpr) node.subtree(1).accept(this, null);
+					AbsStmt thenFirst = (AbsStmt)node.subtree(3).accept(this, null);
+					AbsStmts thenOthers = (AbsStmts) node.subtree(4).accept(this, null);
+					thenOthers.stmts().add(0, thenFirst);
+					
+					AbsStmts elseStmts = (AbsStmts) node.subtree(5).accept(this, null);
+					
+					return new AbsIfStmt(new Location(node), cond, thenOthers, elseStmts);
+				}
+				case WHILE:{
+					AbsExpr cond = (AbsExpr) node.subtree(1).accept(this, null);
+					AbsStmt thenFirst = (AbsStmt)node.subtree(3).accept(this, null);
+					AbsStmts thenOthers = (AbsStmts) node.subtree(4).accept(this, null);
+					thenOthers.stmts().add(0, thenFirst);
+					
+					return new AbsWhileStmt(new Location(node), cond, thenOthers);	
+				}
+				}
+				
+			}
+			
 			AbsExpr expr = (AbsExpr)node.subtree(0).accept(this, null);
-			
 			return node.subtree(1).accept(this, expr);
-			
-			// TODO IF AND WHEN
-			
-			
+		}
+		
+		case ElseEps:{
+			if(node.numSubtrees() == 0) {
+				return new AbsStmts(new Location(1,1,1,1), new Vector<AbsStmt>());
+			}
+			AbsStmt first = (AbsStmt)node.subtree(1).accept(this, null);
+			AbsStmts others = (AbsStmts) node.subtree(2).accept(this, null);
+			others.stmts().add(0, first);
+			return others;
 		}
 		
 		case AssignEps:{
