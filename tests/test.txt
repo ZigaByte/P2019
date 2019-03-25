@@ -1,96 +1,53 @@
-typ sasa : char;
-typ ziga : int;
-typ ziga : void;
-typ ziga : bool;
-typ ziga : arr[1] int;
-typ ziga : rec(sasa:char, ziga:int, test:bool);
-typ ziga : ptr int;
-typ ziga : ptr arr[1] int;
-typ ziga : sasa;
-typ ziga : (ziga);
-typ ziga : ptr arr[1] int;
-var ziga : sasa;
-var ziga : (ziga);
+typ _hi : int;
+typ _hi : char;
+typ _hi : bool;
+var _hi : void;
+typ _hi : arr[1+5]ptr test;
+typ _hi : rec(a:int, b:char, c:int);
+var _hi : rec(a:int);
+typ _hi : ptr bool;
+var _hi : haha;
+typ _hi : (int);
 
-fun sestej (x : int, y : int) : int = {
-	1;
-	rezultat = 1;
-	rezultat = 'a';
-	rezultat = true;
-	rezultat = false;
-	rezultat = none;
-	rezultat = !true;
-	rezultat = -1;
-	rezultat = +1;
-	rezultat = @1;
-	rezultat = $1;
-	rezultat = new(int);
-	rezultat = del(34);
-	rezultat = (hello);
-	rezultat = test;
-	rezultat = test(abc, 123);
-	rezultat = array[index];
-	rezultat = something.something_else;
-	rezultat = (something:int);
-	
-	1+2+3+4+5+6+7+8+9;
-	1+2*3+4+5+6+7+8+9;
-	1+2+3*4+5+6+7+8/!9;
-	1+2+3+4*5+6+7+8+9;
-	1+2+3*4*5*+7+8+9;
-	1==+3+4+5|6+7+8+9;
-	1+2!=+4+5+6+7+8+9;
-	1+2+3<=+5+7&8<=9;
-	1|2|3 >= (4 ^ 5) % 5;
-	
-	: rezultat
+fun test():int;
+fun test():char = {1;:1};
+fun test(a:int, b:char):char = {1;:1};
+fun test(a:int, b:char):char = {
+1;:1
+where fun b():int={5;:a+b};
 };
 
-fun testFun () : char = {
-    sestej (ziga, sasa);
-
-	abc = 5 * 2 + 2 * 5; 
+fun allExpr(a:ptr bl5a):int = {
+	"Hello, world!";
+	test = 5;
+	test = -5;
+	test = 1-5;
+	test = 1|5;
+	test = 1&5;
+	test = 1==5;
+	test = lol;
+	test = lol(a,b,c);
+	test = lol[5+6*i];
+	test = new(int);
+	test = del(test);
+	i = (test:int);
+	i = (test) + 1 + (test * (tset));
 	
-	if 2+2 == 3 then
-		if 2+2 == 3 then
-			if 2+2 == 3 then
-				if 2+2 == 3 then
-					none; 
-				else 
-					1; 
-				end; 
-			else 
-				1; 
-			end; 
-		else 
-			1; 
-		end; 
-	else 
-		1; 
+	if 8 < 9+1 then
+		5+91+2711-(-2-2)*5 ==1;
 	end;
 	
-	while 2+3 <= 5 do
-		abc;
+	
+	if 8 < 9+1 then
+		a = !haha == 1;
+	else
+		a 
+		= a+b;
+	end;
+	while true do
+		"Jaz bom programiru";
 		test;
-		if (test == 2) then
-			bla = 1 ^ 2;
-			while 2+3 <= 5 do
-				abc;
-				test;
-				if (test == 2) then
-					bla = 1 ^ 2;
-				end;
-			end;
-		else 
-			hello;
-		end;
 	end;
-	
-	: none
-};
-
-fun weird (aa:k, bb:l) : int = {
-	hello; :{a;:none} where
-		typ abc : int;
-		fun test (a:int) : int;
+	:123
+	where var i:int;
 };
