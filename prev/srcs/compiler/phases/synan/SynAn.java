@@ -305,7 +305,6 @@ public class SynAn extends Phase {
 			add(stmtNode, Term.IF, String.format("Expected symbol %s, but received %s.", Term.IF, currSymb.token));
 			stmtNode.add(parseExpr());
 			add(stmtNode, Term.THEN, String.format("Expected symbol %s, but received %s.", Term.THEN, currSymb.token));
-			stmtNode.add(parseStmt());
 			stmtNode.add(parseStmts());
 			stmtNode.add(parseElse());
 			add(stmtNode, Term.END, String.format("Expected symbol %s, but received %s.", Term.END, currSymb.token));
@@ -315,7 +314,6 @@ public class SynAn extends Phase {
 			add(stmtNode, Term.WHILE, String.format("Expected symbol %s, but received %s.", Term.WHILE, currSymb.token));
 			stmtNode.add(parseExpr());
 			add(stmtNode, Term.DO, String.format("Expected symbol %s, but received %s.", Term.DO, currSymb.token));
-			stmtNode.add(parseStmt());
 			stmtNode.add(parseStmts());	
 			add(stmtNode, Term.END, String.format("Expected symbol %s, but received %s.", Term.END, currSymb.token));
 			add(stmtNode, Term.SEMIC, String.format("Expected symbol %s, but received %s.", Term.SEMIC, currSymb.token));
@@ -347,6 +345,39 @@ public class SynAn extends Phase {
 		
 	}
 	
+	private DerNode parseStmtsRest() {
+		DerNode stmtNode = new DerNode(Nont.StmtsRest);
+		switch (currSymb.token) {
+		case IDENTIFIER:
+		case LPARENTHESIS:
+		case IF:
+		case WHILE:
+		case ADD:
+		case SUB:
+		case NOT:
+		case DATA:
+		case ADDR:
+		case NEW:
+		case DEL: 
+		case VOIDCONST:
+		case BOOLCONST:
+		case INTCONST:
+		case PTRCONST:
+		case STRCONST:
+		case CHARCONST:
+			stmtNode.add(parseStmt());
+			stmtNode.add(parseStmtsRest());
+			return stmtNode;	
+			
+		case COLON:
+		case END:
+		case ELSE:
+			return stmtNode;
+		default:
+			throw new Report.Error(currSymb, String.format("[parseStmtsRest] Symbol %s (%s) not expected.", currSymb, currSymb.token));
+		}
+	}
+	
 	private DerNode parseStmts() {
 		DerNode stmtNode = new DerNode(Nont.Stmts);
 		switch (currSymb.token) {
@@ -368,12 +399,7 @@ public class SynAn extends Phase {
 		case STRCONST:
 		case CHARCONST:
 			stmtNode.add(parseStmt());
-			stmtNode.add(parseStmts());
-			return stmtNode;	
-			
-		case COLON:
-		case END:
-		case ELSE:
+			stmtNode.add(parseStmtsRest());
 			return stmtNode;
 		default:
 			throw new Report.Error(currSymb, String.format("[parseStmts] Symbol %s (%s) not expected.", currSymb, currSymb.token));
@@ -387,7 +413,6 @@ public class SynAn extends Phase {
 			return elseNode;
 		case ELSE:
 			add(elseNode, Term.ELSE, String.format("Expected symbol %s, but received %s.", Term.ELSE, currSymb.token));
-			elseNode.add(parseStmt());
 			elseNode.add(parseStmts());
 			return elseNode;
 		default:
@@ -836,7 +861,6 @@ public class SynAn extends Phase {
 			
 		case LBRACE:
 			add(exprNode, Term.LBRACE, String.format("Expected symbol %s, but received %s.", Term.LBRACE, currSymb.token));
-			exprNode.add(parseStmt());
 			exprNode.add(parseStmts());
 			add(exprNode, Term.COLON, String.format("Expected symbol %s, but received %s.", Term.COLON, currSymb.token));
 			exprNode.add(parseExpr());

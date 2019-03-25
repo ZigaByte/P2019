@@ -418,19 +418,24 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 			case PTRCONST:
 				return new AbsAtomExpr(new Location(node), AbsAtomExpr.Type.PTR, ((DerLeaf)node.subtree(0)).symb.lexeme);
 			case LBRACE:
-				Vector<AbsStmt> stmts = new Vector<AbsStmt>();
-				stmts.add((AbsStmt)node.subtree(1).accept(this, null));
-				stmts.addAll(((AbsStmts)node.subtree(2).accept(this, null)).stmts());
+				AbsStmts stmts = (AbsStmts)node.subtree(1).accept(this, null);
 				
-				AbsExpr expr = (AbsExpr) node.subtree(4).accept(this, null);
-				AbsDecls decls = (AbsDecls) node.subtree(5).accept(this, null);
+				AbsExpr expr = (AbsExpr) node.subtree(3).accept(this, null);
+				AbsDecls decls = (AbsDecls) node.subtree(4).accept(this, null);
 				
-				return new AbsBlockExpr(new Location(node), decls, new AbsStmts(new Location(node), stmts), expr);
+				return new AbsBlockExpr(new Location(node), decls, stmts, expr);
 			
 			default: System.out.println("Something went wrong");;
 			}
 		}
 		case Stmts:{
+			Vector<AbsStmt> stmts = new Vector<AbsStmt>();
+			stmts.add((AbsStmt)node.subtree(0).accept(this, null));
+			stmts.addAll(((AbsStmts)node.subtree(1).accept(this, null)).stmts());
+			return new AbsStmts(new Location(stmts.firstElement(), stmts.lastElement()), stmts);
+		}
+		
+		case StmtsRest:{
 			if(node.numSubtrees() == 0) {
 				return new AbsStmts(new Location(1,1,1,1), new Vector<AbsStmt>());
 			}
@@ -445,19 +450,14 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 				switch (((DerLeaf)node.subtree(0)).symb.token) {
 				case IF:{
 					AbsExpr cond = (AbsExpr) node.subtree(1).accept(this, null);
-					AbsStmt thenFirst = (AbsStmt)node.subtree(3).accept(this, null);
-					AbsStmts thenOthers = (AbsStmts) node.subtree(4).accept(this, null);
-					thenOthers.stmts().add(0, thenFirst);
+					AbsStmts thenOthers = (AbsStmts) node.subtree(3).accept(this, null);					
+					AbsStmts elseStmts = (AbsStmts) node.subtree(4).accept(this, null);
 					
-					AbsStmts elseStmts = (AbsStmts) node.subtree(5).accept(this, null);
-					
-					return new AbsIfStmt(new Location(node.subtree(0), node.subtree(7)), cond, thenOthers, elseStmts);
+					return new AbsIfStmt(new Location(node), cond, thenOthers, elseStmts);
 				}
 				case WHILE:{
 					AbsExpr cond = (AbsExpr) node.subtree(1).accept(this, null);
-					AbsStmt thenFirst = (AbsStmt)node.subtree(3).accept(this, null);
-					AbsStmts thenOthers = (AbsStmts) node.subtree(4).accept(this, null);
-					thenOthers.stmts().add(0, thenFirst);
+					AbsStmts thenOthers = (AbsStmts) node.subtree(3).accept(this, null);
 					
 					return new AbsWhileStmt(new Location(node), cond, thenOthers);	
 				}
@@ -473,9 +473,7 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 			if(node.numSubtrees() == 0) {
 				return new AbsStmts(new Location(1,1,1,1), new Vector<AbsStmt>());
 			}
-			AbsStmt first = (AbsStmt)node.subtree(1).accept(this, null);
-			AbsStmts others = (AbsStmts) node.subtree(2).accept(this, null);
-			others.stmts().add(0, first);
+			AbsStmts others = (AbsStmts) node.subtree(1).accept(this, null);
 			return others;
 		}
 		
