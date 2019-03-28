@@ -57,6 +57,12 @@ E' -> + T E' | - T E' | eps
 ```
 You can also use the tool at: http://mdaines.github.io/grammophone/ -> input your cfg -> transform -> remove left recursion.
 
+### ABS Creation
+Created the ABS from the derivaction tree. Uses visitor approach
+
+### Name checking
+Checking names. Does 5 passes of the program to connect names to the declarations.
+
 ## Notes:
 - System.out.println is not allowed for grading, should be turned off before turning in any of the assignments.
 - For assignments we can only use basic JDK packages.
