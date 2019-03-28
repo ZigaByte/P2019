@@ -350,6 +350,7 @@ public class SynAn extends Phase {
 		switch (currSymb.token) {
 		case IDENTIFIER:
 		case LPARENTHESIS:
+		case LBRACE:
 		case IF:
 		case WHILE:
 		case ADD:
@@ -383,6 +384,7 @@ public class SynAn extends Phase {
 		switch (currSymb.token) {
 		case IDENTIFIER:
 		case LPARENTHESIS:
+		case LBRACE:
 		case IF:
 		case WHILE:
 		case ADD:
