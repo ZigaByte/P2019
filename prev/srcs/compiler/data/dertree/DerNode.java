@@ -20,22 +20,10 @@ public class DerNode extends DerTree {
 	 * @author sliva
 	 */
 	public enum Nont {
-		Source, 
-		Decls, Decl, DeclsRest,
-		Stmts, StmtsRest, Stmt,
-		
-		Type, Expr, Identifier, 
-		ArgsEps, Arg, ArgsRest,
-		
+		Source, Decls, DeclsRest, Decl, ParDeclsEps, ParDecls, ParDeclsRest, ParDecl, BodyEps, Type, CompDecls, CompDeclsRest, CompDecl, Expr,
 		DisjExpr, DisjExprRest, ConjExpr, ConjExprRest, RelExpr, RelExprRest, AddExpr, AddExprRest, MulExpr,
-		MulExprRest, PrefExpr, PstfExpr, PstfExprRest, AtomExpr, CastExpr,
-		
-		ParDeclsEps, 
-		ParDecls, ParDeclsRest, ParDecl, 
-		CompDecls, CompDeclsRest, CompDecl,
-		BodyEps,  
-		CallEps, CastEps,
-		WhereEps,  AssignEps, ElseEps,
+		MulExprRest, PrefExpr, PstfExpr, PstfExprRest, AtomExpr, CallEps, ArgsEps, Args, ArgsRest, CastEps,
+		WhereEps, Stmts, StmtsRest, Stmt, AssignEps, ElseEps, Arg, CastExpr,
 	};
 
 	/** The CFG nonterminal this node represents. */
