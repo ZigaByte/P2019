@@ -4,7 +4,6 @@
 package compiler.phases.seman;
 
 import compiler.common.report.*;
-import compiler.common.report.Report.Error;
 import compiler.data.abstree.*;
 import compiler.data.abstree.visitor.*;
 import compiler.phases.seman.SymbTable.CannotFndNameException;
