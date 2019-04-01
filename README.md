@@ -61,7 +61,18 @@ You can also use the tool at: http://mdaines.github.io/grammophone/ -> input you
 Created the ABS from the derivaction tree. Uses visitor approach
 
 ### Name checking
-Checking names. Does 5 passes of the program to connect names to the declarations.
+Checking names. Does 2 passes of the program to connect names to the declarations.
+
+### Type checking
+The lists in the SemAn.java represent:
+* declaresType maps type delcarations to their declared type (SemNamedType)
+* isType maps type expressions to types
+* isOfType maps expressions to types
+* isAddr maps expressions to whether or not they can represent 
+
+First pass to fill declaresType will just add NamedTypes with no values. The second pass will fill the value, which will connect the NamedTypes together.
+The others get filled later on.
+
 
 ## Notes:
 - System.out.println is not allowed for grading, should be turned off before turning in any of the assignments.
