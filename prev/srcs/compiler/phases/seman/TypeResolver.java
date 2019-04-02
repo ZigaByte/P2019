@@ -18,6 +18,10 @@ import compiler.data.type.property.*;
  */
 public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 
+	enum Phase{
+		
+	}
+	
 	/** Symbol tables of individual record types. */
 	private final HashMap<SemRecType, SymbTable> symbTables = new HashMap<SemRecType, SymbTable>();
 
