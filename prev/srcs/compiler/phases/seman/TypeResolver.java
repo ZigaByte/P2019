@@ -19,7 +19,8 @@ import compiler.data.type.property.*;
 public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 
 	enum Phase{
-		DECLARES_TYPE_CREATION, DECLARES_TYPE_LINKING
+		DECLARES_TYPE_CREATION, DECLARES_TYPE_LINKING,
+		TYPE_RESOLUTION
 	}
 	
 	/** Symbol tables of individual record types. */
@@ -30,10 +31,13 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 		super.visit(source, Phase.DECLARES_TYPE_CREATION);
 		
 		System.out.println(SemAn.declaresType);
+		System.out.println(SemAn.isType);
 		
 		super.visit(source, Phase.DECLARES_TYPE_LINKING);
 		
 		System.out.println(SemAn.declaresType);
+		System.out.println(SemAn.isType);
+		
 		return null;
 	}
 	
@@ -53,18 +57,25 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	@Override
 	public SemType visit(AbsAtomType atomType, Phase visArg) {
 		if(visArg == Phase.DECLARES_TYPE_LINKING) {
+			SemType newType = null;
 			switch (atomType.type) {
 			case INT:
-				return new SemIntType();
+				newType = new SemIntType();
+				break;
 			case BOOL:
-				return new SemBoolType();
+				newType = new SemBoolType();
+				break;
 			case CHAR:
-				return new SemCharType();
+				newType = new SemCharType();
+				break;
 			case VOID:
-				return new SemVoidType();
+				newType = new SemVoidType();
+				break;
 			}
+			SemAn.isType.put(atomType, newType);
+			return newType;
 		}
-		return null;
+		return super.visit(atomType, visArg);
 	}
 	
 	@Override
@@ -72,19 +83,24 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 		if(visArg == Phase.DECLARES_TYPE_LINKING) {
 			// TODO WHAT about constants as variables?????
 			if(arrType.len instanceof AbsAtomExpr) {
-				return new SemArrType(Integer.parseInt(((AbsAtomExpr)arrType.len).expr), (SemType)arrType.elemType.accept(this, visArg));
+				int len = Integer.parseInt(((AbsAtomExpr)arrType.len).expr);
+				SemType newType = new SemArrType(len, arrType.elemType.accept(this, visArg));
+				SemAn.isType.put(arrType, newType);
+				return newType;
 			}
 			System.out.println("IDK, ERROR, NOT AN INTERGER CONSTANT IN THE ARRAY");
 		}
-		return null;
+		return super.visit(arrType, visArg);
 	}
 	
 	@Override
 	public SemType visit(AbsPtrType ptrType, Phase visArg) {
 		if(visArg == Phase.DECLARES_TYPE_LINKING) {
-			return new SemPtrType(ptrType.ptdType.accept(this, visArg));
+			SemType newType = new SemPtrType(ptrType.ptdType.accept(this, visArg));
+			SemAn.isType.put(ptrType, newType);
+			return newType;
 		}
-		return null;
+		return super.visit(ptrType, visArg);
 	}
 	
 	
@@ -99,9 +115,11 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 				compTypes.add(decl.accept(this, Phase.DECLARES_TYPE_LINKING));
 				System.out.println(decl.accept(this, Phase.DECLARES_TYPE_LINKING));
 			}
-			return new SemRecType(compTypes);
+			SemType newType = new SemRecType(compTypes);
+			SemAn.isType.put(recType, newType);
+			return newType;
 		}
-		return null;
+		return super.visit(recType, visArg);
 	}
 	
 	@Override
