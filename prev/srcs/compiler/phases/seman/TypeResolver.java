@@ -108,4 +108,12 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	public SemType visit(AbsCompDecl compDecl, Phase visArg) {
 		return compDecl.type.accept(this, visArg);
 	}
+	
+	@Override
+	public SemType visit(AbsTypName typName, Phase visArg) {
+		if(visArg == Phase.DECLARES_TYPE_LINKING) {
+			return (SemType) SemAn.declaredAt.get(typName).type.accept(this, visArg);
+		}
+		return super.visit(typName, visArg);
+	}
 }
