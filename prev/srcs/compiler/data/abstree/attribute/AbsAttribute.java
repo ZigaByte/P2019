@@ -59,5 +59,13 @@ public class AbsAttribute<Node extends AbsTree, Value> {
 	public void lock() {
 		lock = true;
 	}
+	
+	public String toString() {
+		String elements = "";
+		for(Node n : mapping.keySet()) {
+			elements += "\t" + get(n) + "\n";
+		}
+		return String.format("%s of length %d \n%s", super.toString(), mapping.keySet().size(), elements);
+	}
 
 }
