@@ -30,13 +30,13 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	public SemType visit(AbsSource source, Phase visArg) {
 		super.visit(source, Phase.DECLARES_TYPE_CREATION);
 		
-		System.out.println(SemAn.declaresType);
-		System.out.println(SemAn.isType);
-		
+		//System.out.println(SemAn.declaresType);
+		//System.out.println(SemAn.isType);
+
 		super.visit(source, Phase.DECLARES_TYPE_LINKING);
 		
-		System.out.println(SemAn.declaresType);
-		System.out.println(SemAn.isType);
+		//System.out.println(SemAn.declaresType);
+		//System.out.println(SemAn.isType);
 		
 		return null;
 	}
@@ -84,7 +84,11 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			// TODO WHAT about constants as variables?????
 			if(arrType.len instanceof AbsAtomExpr) {
 				int len = Integer.parseInt(((AbsAtomExpr)arrType.len).expr);
-				SemType newType = new SemArrType(len, arrType.elemType.accept(this, visArg));
+				SemType elementType = arrType.elemType.accept(this, visArg);
+				if(elementType instanceof SemVoidType) {
+					throw new Report.Error(arrType, String.format("[typeResolving] Void type not allowed in array."));
+				}
+				SemType newType = new SemArrType(len, elementType);
 				SemAn.isType.put(arrType, newType);
 				return newType;
 			}
@@ -112,8 +116,11 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 		if(visArg == Phase.DECLARES_TYPE_LINKING) {
 			Vector<SemType> compTypes = new Vector<>();
 			for(AbsCompDecl decl : recType.compDecls.compDecls()) {
-				compTypes.add(decl.accept(this, Phase.DECLARES_TYPE_LINKING));
-				System.out.println(decl.accept(this, Phase.DECLARES_TYPE_LINKING));
+				SemType elementType = decl.accept(this, Phase.DECLARES_TYPE_LINKING);
+				if(elementType instanceof SemVoidType) {
+					throw new Report.Error(recType, String.format("[typeResolving] Void type not allowed in record."));
+				}
+				compTypes.add(elementType);
 			}
 			SemType newType = new SemRecType(compTypes);
 			SemAn.isType.put(recType, newType);
