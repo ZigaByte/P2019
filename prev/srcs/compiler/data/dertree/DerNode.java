@@ -23,7 +23,7 @@ public class DerNode extends DerTree {
 		Source, Decls, DeclsRest, Decl, ParDeclsEps, ParDecls, ParDeclsRest, ParDecl, BodyEps, Type, CompDecls, CompDeclsRest, CompDecl, Expr,
 		DisjExpr, DisjExprRest, ConjExpr, ConjExprRest, RelExpr, RelExprRest, AddExpr, AddExprRest, MulExpr,
 		MulExprRest, PrefExpr, PstfExpr, PstfExprRest, AtomExpr, CallEps, ArgsEps, Args, ArgsRest, CastEps,
-		WhereEps, Stmts, StmtsRest, Stmt, AssignEps, ElseEps, Arg, CastExpr,
+		WhereEps, Stmts, StmtsRest, Stmt, AssignEps, ElseEps,
 	};
 
 	/** The CFG nonterminal this node represents. */
