@@ -126,7 +126,7 @@ public class NameResolver extends AbsFullVisitor<Object, Object> {
 
 			// Somehow add parameters
 			funDef.parDecls.accept(this, Mode.ADD_FUN_PARAMS);
-			funDef.value.accept(this, Mode.ADD_FUN_PARAMS);
+			funDef.value.accept(this, null);
 
 			symbTable.oldScope();	
 
@@ -137,18 +137,15 @@ public class NameResolver extends AbsFullVisitor<Object, Object> {
 	// Create a new scope. But only if you did not come from a function
 	@Override
 	public Object visit(AbsBlockExpr blockExpr, Object visArg) {
-		if (visArg != Mode.ADD_FUN_PARAMS) {
-			// Create new scope
-			symbTable.newScope();
-		}
+		// Create new scope
+		symbTable.newScope();
+		
 		
 		// Clear the argument when going in
 		super.visit(blockExpr, null);
 		
-		if (visArg != Mode.ADD_FUN_PARAMS) {
-			// Create new scope
-			symbTable.oldScope();
-		}
+		// Exit new scope
+		symbTable.oldScope();
 		
 		return null;
 	}
