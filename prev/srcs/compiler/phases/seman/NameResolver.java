@@ -103,7 +103,18 @@ public class NameResolver extends AbsFullVisitor<Object, Object> {
 			}
 			return null;
 		} else {
-			return super.visit(funDecl, visArg);
+			// Find the type
+			funDecl.type.accept(this, visArg);
+
+			// Create new scope
+			symbTable.newScope();
+
+			// Somehow add parameters
+			funDecl.parDecls.accept(this, Mode.ADD_FUN_PARAMS);
+
+			symbTable.oldScope();	
+
+			return null;
 		}
 	}
 
