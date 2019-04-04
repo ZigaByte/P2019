@@ -4,6 +4,7 @@
 package compiler.phases.seman;
 
 import java.util.*;
+
 import compiler.common.report.*;
 import compiler.data.abstree.*;
 import compiler.data.abstree.visitor.*;
@@ -137,7 +138,9 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	@Override
 	public SemType visit(AbsTypName typName, Phase visArg) {
 		if(visArg == Phase.DECLARES_TYPE_LINKING) {
-			return (SemType) SemAn.declaredAt.get(typName).type.accept(this, visArg);
+			SemType newType = SemAn.declaresType.get((AbsTypDecl) SemAn.declaredAt.get(typName));
+			SemAn.isType.put(typName, newType);
+			return newType;
 		}
 		return super.visit(typName, visArg);
 	}
