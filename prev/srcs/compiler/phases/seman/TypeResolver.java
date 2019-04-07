@@ -376,4 +376,33 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 		}
 		return super.visit(delExpr, visArg);
 	}
+	
+	@Override
+	public SemType visit(AbsArrExpr arrExpr, Phase visArg) {
+		if(visArg == Phase.EXPR_LINK) {
+			SemType arrayType = arrExpr.array.accept(this, visArg);
+			while (arrayType instanceof SemNamedType) {
+				arrayType = ((SemNamedType)arrayType).type;
+			}
+		
+			SemType index = arrExpr.index.accept(this, visArg);
+			while (index instanceof SemNamedType) {
+				index = ((SemNamedType)index).type;
+			}
+			
+			if(!(arrayType instanceof SemArrType)) {
+				throw new Report.Error(arrExpr.location(), String.format("[typeResolving] Expression before [] must be of type array."));	
+			}
+			
+			if(!(index instanceof SemIntType)) {
+				throw new Report.Error(arrExpr.location(), String.format("[typeResolving] Expression for array index must be of type int."));	
+			}
+			
+			SemType thisType = ((SemArrType)arrayType).elemType;
+			SemAn.ofType.put(arrExpr, thisType);
+			return thisType; 
+		}
+		
+		return super.visit(arrExpr, visArg);
+	}
 }
