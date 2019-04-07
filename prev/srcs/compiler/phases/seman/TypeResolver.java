@@ -215,7 +215,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	public SemType visit(AbsUnExpr unExpr, Phase visArg) {
 		if (visArg == Phase.EXPR_LINK) {
 			SemType it = unExpr.subExpr.accept(this, visArg);
-			if(it instanceof SemNamedType) {
+			while (it instanceof SemNamedType) {
 				it = ((SemNamedType)it).type;
 			}
 			
@@ -271,10 +271,10 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 		if (visArg == Phase.EXPR_LINK) {
 			SemType it1 = binExpr.fstExpr.accept(this, visArg);
 			SemType it2 = binExpr.sndExpr.accept(this, visArg);
-			if(it1 instanceof SemNamedType) {
+			while (it1 instanceof SemNamedType) {
 				it1 = ((SemNamedType)it1).type;
 			}
-			if(it2 instanceof SemNamedType) {
+			while (it2 instanceof SemNamedType) {
 				it2 = ((SemNamedType)it2).type;
 			}
 			
@@ -294,7 +294,6 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			case MUL:
 			case DIV:
 			case MOD:{
-				// TODO Check if the types have to be the same.
 				if(!( (it1 instanceof SemIntType && it2 instanceof SemIntType)
 						|| (it1 instanceof SemCharType && it2 instanceof SemCharType) )) {
 					throw new Report.Error(binExpr.location(), "[typeResolving] Expressions around +,-,*,/,% must be of type int or char. The two types must be the same.");
@@ -305,7 +304,6 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			}
 			case EQU:
 			case NEQ:{
-				// TODO must be the same?? Pointer types???
 				if(!( (it1 instanceof SemBoolType && it2 instanceof SemBoolType)
 						|| (it1 instanceof SemCharType && it2 instanceof SemCharType)
 						|| (it1 instanceof SemIntType && it2 instanceof SemIntType)
@@ -320,7 +318,6 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			case GTH:
 			case LEQ:
 			case LTH:{
-				// TODO must be the same?? Pointer types???
 				if(!( (it1 instanceof SemCharType && it2 instanceof SemCharType)
 						|| (it1 instanceof SemIntType && it2 instanceof SemIntType)
 						|| (it1 instanceof SemPtrType && it2 instanceof SemPtrType && ((SemPtrType)it1).matches((SemPtrType) it2)))) {
@@ -342,7 +339,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	public SemType visit(AbsNewExpr newExpr, Phase visArg) {
 		if(visArg == Phase.EXPR_LINK) {
 			SemType it = newExpr.type.accept(this, visArg);
-			if(it instanceof SemNamedType) {
+			while (it instanceof SemNamedType) {
 				it = ((SemNamedType)it).type;
 			}
 			
@@ -361,7 +358,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	public SemType visit(AbsDelExpr delExpr, Phase visArg) {
 		if(visArg == Phase.EXPR_LINK) {
 			SemType it = delExpr.expr.accept(this, visArg);
-			if(it instanceof SemNamedType) {
+			while (it instanceof SemNamedType) {
 				it = ((SemNamedType)it).type;
 			}
 			
