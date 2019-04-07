@@ -430,7 +430,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 				compDecl = table.fnd(recExpr.comp.name);	
 				SemAn.declaredAt.put(recExpr.comp, compDecl);
 			} catch (CannotFndNameException e) {
-				throw new Report.Error("[nameResolution] " + recExpr.location() + " Record does not cotain compoment " + recExpr.comp.name);
+				throw new Report.Error(recExpr.location(), "[nameResolution] Record does not cotain compoment " + recExpr.comp.name);
 			}
 			
 			// Then connect the type
@@ -446,14 +446,14 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 		if(visArg == Phase.EXPR_LINK) {
 			AbsDecl decl = SemAn.declaredAt.get(funName);
 			if(!(decl instanceof AbsFunDecl)) {
-				throw new Report.Error("[typeResolving] " + funName.location() + " Not a function.");
+				throw new Report.Error(funName.location() , "[typeResolving] Not a function.");
 			}
 			AbsFunDecl funDecl = (AbsFunDecl) decl;
 			
 			Vector<AbsExpr> args = funName.args.args();
 			Vector<AbsParDecl> pars = funDecl.parDecls.parDecls();
 			if(args.size() != pars.size()) {
-				throw new Report.Error("[typeResolving] " + funName.location() + " Number of function parameters does not match.");
+				throw new Report.Error(funName.location(), "[typeResolving] Number of function parameters does not match.");
 			}
 			
 			for (int i = 0; i < args.size(); i++) {
@@ -471,7 +471,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 				}
 				
 				if(!argType.matches(parType)) {
-					throw new Report.Error("[typeResolving] " + funName.location() + " Parameter types do not match");
+					throw new Report.Error(funName.location(), "[typeResolving] Parameter types do not match.");
 				}
 			}
 			
@@ -482,13 +482,52 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 					|| returnType instanceof SemCharType 
 					|| returnType instanceof SemIntType
 					|| returnType instanceof SemPtrType )) {
-				throw new Report.Error(funName.location(), "[typeResolving]" + funName.location() + " Return type not allowed");
+				throw new Report.Error(funName.location(), "[typeResolving] Return type of function not allowed.");
 			}
 			
 			SemAn.ofType.put(funName	, returnType);
 			return returnType; 
 		}
 		return super.visit(funName, visArg);
+	}
+	
+	@Override
+	public SemType visit(AbsBlockExpr blockExpr, Phase visArg) {
+		if(visArg == Phase.EXPR_LINK) {
+			SemType type = blockExpr.expr.accept(this, visArg);
+			SemAn.ofType.put(blockExpr, type);
+			
+			// Make sure to still visit all the other branches before returning
+			blockExpr.decls.accept(this, visArg);
+			blockExpr.stmts.accept(this, visArg);
+			
+			return type;
+		}	
+		
+		return super.visit(blockExpr, visArg);
+	}
+	
+	@Override
+	public SemType visit(AbsCastExpr castExpr, Phase visArg) {
+
+		if(visArg == Phase.EXPR_LINK) {
+			SemType eType = castExpr.expr.accept(this, visArg);
+			SemType tType = castExpr.type.accept(this, visArg);
+			if(!(eType instanceof SemCharType 
+					|| eType instanceof SemIntType
+					|| eType instanceof SemPtrType )) {
+				throw new Report.Error(castExpr.location(), "[typeResolving] Expression type in cast not allowed.");
+			}
+			if(!(tType instanceof SemCharType 
+					|| tType instanceof SemIntType
+					|| tType instanceof SemPtrType )) {
+				throw new Report.Error(castExpr.location(), "[typeResolving] Cast to specified type not allowed.");
+			}
+			
+			SemAn.ofType.put(castExpr, tType);
+			return tType;
+		}
+		return super.visit(castExpr, visArg);
 	}
 	
 
