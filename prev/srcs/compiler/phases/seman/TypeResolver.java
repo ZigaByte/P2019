@@ -57,6 +57,11 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	}
 	
 	@Override
+	public SemType visit(AbsParDecl parDecl, Phase visArg) {
+		return parDecl.type.accept(this, visArg);
+	}
+	
+	@Override
 	public SemType visit(AbsVarDecl varDecl, Phase visArg) {
 		if(visArg == Phase.EXPR_LINK) {
 			SemType newType = varDecl.type.accept(this, visArg);
@@ -209,10 +214,14 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	@Override
 	public SemType visit(AbsUnExpr unExpr, Phase visArg) {
 		if (visArg == Phase.EXPR_LINK) {
+			SemType it = unExpr.subExpr.accept(this, visArg);
+			if(it instanceof SemNamedType) {
+				it = ((SemNamedType)it).type;
+			}
+			
 			switch (unExpr.oper) {
 			case NOT:{
-				SemType insideType = unExpr.subExpr.accept(this, visArg);
-				if(!(insideType instanceof SemBoolType)) {
+				if(!(it instanceof SemBoolType)) {
 					throw new Report.Error(unExpr.location(), String.format("[typeResolving] Expression after unary ! must be of type bool."));
 				}
 				SemType thisType = new SemBoolType();
@@ -221,8 +230,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			}
 			case SUB:
 			case ADD:{
-				SemType insideType = unExpr.subExpr.accept(this, visArg);
-				if(!(insideType instanceof SemIntType)) {
+				if(!(it instanceof SemIntType)) {
 					throw new Report.Error(unExpr.location(), String.format("[typeResolving] Expression after unary +,- must be of type int."));
 				}
 				SemType thisType = new SemIntType();
@@ -230,20 +238,18 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 				return thisType; 
 			}
 			case ADDR:{// $
-				SemType insideType = unExpr.subExpr.accept(this, visArg);
-				if(insideType instanceof SemVoidType) {
+				if(it instanceof SemVoidType) {
 					throw new Report.Error(unExpr.location(), String.format("[typeResolving] Expression after unary $ must not be of type void."));	
 				}
-				SemType thisType = new SemPtrType(insideType);
+				SemType thisType = new SemPtrType(it);
 				SemAn.ofType.put(unExpr, thisType);
 				return thisType; 
 			}
 			case DATA:{// @
-				SemType insideType = unExpr.subExpr.accept(this, visArg);
-				if(!(insideType instanceof SemPtrType)) {
+				if(!(it instanceof SemPtrType)) {
 					throw new Report.Error(unExpr.location(), String.format("[typeResolving] Expression after unary @ must be a pointer."));	
 				}
-				SemPtrType ptrType = (SemPtrType) insideType;
+				SemPtrType ptrType = (SemPtrType) it;
 				if(ptrType.ptdType instanceof SemVoidType) {
 					throw new Report.Error(unExpr.location(), String.format("[typeResolving] Expression after unary @ must not be void pointer."));	
 				}
@@ -263,13 +269,20 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	@Override
 	public SemType visit(AbsBinExpr binExpr, Phase visArg) {
 		if (visArg == Phase.EXPR_LINK) {
+			SemType it1 = binExpr.fstExpr.accept(this, visArg);
+			SemType it2 = binExpr.sndExpr.accept(this, visArg);
+			if(it1 instanceof SemNamedType) {
+				it1 = ((SemNamedType)it1).type;
+			}
+			if(it2 instanceof SemNamedType) {
+				it2 = ((SemNamedType)it2).type;
+			}
+			
 			switch (binExpr.oper) {
 			case AND:
 			case IOR:
 			case XOR:{
-				SemType insideType1 = binExpr.fstExpr.accept(this, visArg);
-				SemType insideType2 = binExpr.sndExpr.accept(this, visArg);
-				if(!(insideType1 instanceof SemBoolType) || !(insideType2 instanceof SemBoolType)) {
+				if(!(it1 instanceof SemBoolType) || !(it2 instanceof SemBoolType)) {
 					throw new Report.Error(binExpr.location(), "[typeResolving] Expressions around &, | or ^ must be of type bool.");
 				}
 				SemType thisType = new SemBoolType();
@@ -282,8 +295,6 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			case DIV:
 			case MOD:{
 				// TODO Check if the types have to be the same.
-				SemType it1 = binExpr.fstExpr.accept(this, visArg);
-				SemType it2 = binExpr.sndExpr.accept(this, visArg);
 				if(!( (it1 instanceof SemIntType && it2 instanceof SemIntType)
 						|| (it1 instanceof SemCharType && it2 instanceof SemCharType) )) {
 					throw new Report.Error(binExpr.location(), "[typeResolving] Expressions around +,-,*,/,% must be of type int or char. The two types must be the same.");
@@ -295,12 +306,10 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			case EQU:
 			case NEQ:{
 				// TODO must be the same?? Pointer types???
-				SemType it1 = binExpr.fstExpr.accept(this, visArg);
-				SemType it2 = binExpr.sndExpr.accept(this, visArg);
 				if(!( (it1 instanceof SemBoolType && it2 instanceof SemBoolType)
 						|| (it1 instanceof SemCharType && it2 instanceof SemCharType)
 						|| (it1 instanceof SemIntType && it2 instanceof SemIntType)
-						|| (it1 instanceof SemPtrType && it2 instanceof SemPtrType))) {
+						|| (it1 instanceof SemPtrType && it2 instanceof SemPtrType && ((SemPtrType)it1).matches((SemPtrType) it2)))) {
 					throw new Report.Error(binExpr.location(), "[typeResolving] Expressions around ==,!= must be of type int, char, bool or ptr. The two types must be the same.");
 				}
 				SemType thisType = new SemBoolType();
@@ -312,11 +321,9 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			case LEQ:
 			case LTH:{
 				// TODO must be the same?? Pointer types???
-				SemType it1 = binExpr.fstExpr.accept(this, visArg);
-				SemType it2 = binExpr.sndExpr.accept(this, visArg);
 				if(!( (it1 instanceof SemCharType && it2 instanceof SemCharType)
 						|| (it1 instanceof SemIntType && it2 instanceof SemIntType)
-						|| (it1 instanceof SemPtrType && it2 instanceof SemPtrType))) {
+						|| (it1 instanceof SemPtrType && it2 instanceof SemPtrType && ((SemPtrType)it1).matches((SemPtrType) it2)))) {
 					throw new Report.Error(binExpr.location(), "[typeResolving] Expressions around <,<=,>,>= must be of type int, char, bool or ptr. The two types must be the same.");
 				}
 				SemType thisType = new SemBoolType();
