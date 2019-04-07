@@ -11,6 +11,9 @@ import compiler.data.abstree.AbsBinExpr.Oper;
 import compiler.data.abstree.visitor.*;
 import compiler.data.type.*;
 import compiler.data.type.property.*;
+import compiler.phases.seman.SymbTable.CannotFndNameException;
+import compiler.phases.seman.SymbTable.CannotInsNameException;
+import sun.awt.Symbol;
 
 /**
  * Type resolving: the result is stored in {@link SemAn#declaresType},
@@ -141,9 +144,6 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 
 	@Override
 	public SemType visit(AbsRecType recType, Phase visArg) {
-		if (visArg == Phase.DECLARES_TYPE_CREATION) {
-			// add to symbol array
-		}
 		if (visArg == Phase.DECLARES_TYPE_LINKING) {
 			Vector<SemType> compTypes = new Vector<>();
 			for (AbsCompDecl decl : recType.compDecls.compDecls()) {
@@ -153,8 +153,20 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 				}
 				compTypes.add(elementType);
 			}
-			SemType newType = new SemRecType(compTypes);
+			SemRecType newType = new SemRecType(compTypes);
 			SemAn.isType.put(recType, newType);
+			
+			// add to symbol array
+			SymbTable recTable = new SymbTable();
+			for (AbsCompDecl decl : recType.compDecls.compDecls()) {
+				try {
+					recTable.ins(decl.name, decl);
+				} catch (CannotInsNameException e) {
+					throw new Report.Error("[nameResolution] " + recType.location() + " Could not insert " + decl.name + " into a rector declaration.");
+				}
+			}
+			symbTables.put(newType, recTable);
+			
 			return newType;
 		}else if(visArg == Phase.EXPR_LINK){
 			return SemAn.isType.get(recType);
@@ -405,4 +417,30 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 		
 		return super.visit(arrExpr, visArg);
 	}
+	
+	@Override
+	public SemType visit(AbsRecExpr recExpr, Phase visArg) {
+		if(visArg == Phase.EXPR_LINK) {
+			// First perform a name check for the component name
+			SemRecType recType = (SemRecType) recExpr.record.accept(this, visArg);
+			SymbTable table = symbTables.get(recType);
+			
+			AbsDecl compDecl = null;
+			try {
+				compDecl = table.fnd(recExpr.comp.name);	
+				SemAn.declaredAt.put(recExpr.comp, compDecl);
+			} catch (CannotFndNameException e) {
+				throw new Report.Error("[nameResolution] " + recExpr.location() + " Record does not cotain compoment " + recExpr.comp.name);
+			}
+			
+			// Then connect the type
+			SemType thisType = compDecl.accept(this, visArg);
+			SemAn.ofType.put(recExpr, thisType);
+			return thisType; 
+		}
+		
+		return null;
+	}
+	
+
 }
