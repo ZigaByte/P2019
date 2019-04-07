@@ -438,8 +438,57 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			SemAn.ofType.put(recExpr, thisType);
 			return thisType; 
 		}
-		
 		return null;
+	}
+	
+	@Override
+	public SemType visit(AbsFunName funName, Phase visArg) {
+		if(visArg == Phase.EXPR_LINK) {
+			AbsDecl decl = SemAn.declaredAt.get(funName);
+			if(!(decl instanceof AbsFunDecl)) {
+				throw new Report.Error("[typeResolving] " + funName.location() + " Not a function.");
+			}
+			AbsFunDecl funDecl = (AbsFunDecl) decl;
+			
+			Vector<AbsExpr> args = funName.args.args();
+			Vector<AbsParDecl> pars = funDecl.parDecls.parDecls();
+			if(args.size() != pars.size()) {
+				throw new Report.Error("[typeResolving] " + funName.location() + " Number of function parameters does not match.");
+			}
+			
+			for (int i = 0; i < args.size(); i++) {
+				AbsExpr arg = args.get(i);
+				AbsParDecl par = pars.get(i);
+				
+				SemType argType = arg.accept(this, visArg);
+				SemType parType = par.accept(this, visArg);
+				
+				if(!( (argType instanceof SemBoolType && parType instanceof SemBoolType)
+						|| (argType instanceof SemCharType && parType instanceof SemCharType)
+						|| (argType instanceof SemIntType && parType instanceof SemIntType)
+						|| (argType instanceof SemPtrType && parType instanceof SemPtrType && ((SemPtrType)argType).matches((SemPtrType) parType)))) {
+					throw new Report.Error(funName.location(), "[typeResolving] Parameter or argument type not allowed");
+				}
+				
+				if(!argType.matches(parType)) {
+					throw new Report.Error("[typeResolving] " + funName.location() + " Parameter types do not match");
+				}
+			}
+			
+			// Return type
+			SemType returnType = funDecl.type.accept(this, visArg);
+			if(!( returnType instanceof SemVoidType
+					|| returnType instanceof SemBoolType
+					|| returnType instanceof SemCharType 
+					|| returnType instanceof SemIntType
+					|| returnType instanceof SemPtrType )) {
+				throw new Report.Error(funName.location(), "[typeResolving]" + funName.location() + " Return type not allowed");
+			}
+			
+			SemAn.ofType.put(funName	, returnType);
+			return returnType; 
+		}
+		return super.visit(funName, visArg);
 	}
 	
 
