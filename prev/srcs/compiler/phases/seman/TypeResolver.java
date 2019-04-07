@@ -335,6 +335,48 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			return null;
 		} else {
 			return super.visit(binExpr, visArg);
-		}	
+		}
+	}
+	
+	@Override
+	public SemType visit(AbsNewExpr newExpr, Phase visArg) {
+		if(visArg == Phase.EXPR_LINK) {
+			SemType it = newExpr.type.accept(this, visArg);
+			if(it instanceof SemNamedType) {
+				it = ((SemNamedType)it).type;
+			}
+			
+			if(it instanceof SemVoidType) {
+				throw new Report.Error(newExpr.location(), String.format("[typeResolving] Expression in statement new must not be of type void."));	
+			}
+			SemType thisType = new SemPtrType(it);
+			SemAn.ofType.put(newExpr, thisType);
+			
+			return thisType; 
+		}
+		return super.visit(newExpr, visArg);
+	}
+	
+	@Override
+	public SemType visit(AbsDelExpr delExpr, Phase visArg) {
+		if(visArg == Phase.EXPR_LINK) {
+			SemType it = delExpr.expr.accept(this, visArg);
+			if(it instanceof SemNamedType) {
+				it = ((SemNamedType)it).type;
+			}
+			
+			if(!(it instanceof SemPtrType)) {
+				throw new Report.Error(delExpr.location(), String.format("[typeResolving] Expression in statement new must be a pointer."));	
+			}
+			SemPtrType ptrType = (SemPtrType) it;
+			if(ptrType.ptdType instanceof SemVoidType) {
+				throw new Report.Error(delExpr.location(), String.format("[typeResolving] Expression in statement new must not be of type void."));	
+			}
+			
+			SemType thisType = new SemVoidType();
+			SemAn.ofType.put(delExpr, thisType);
+			return thisType; 
+		}
+		return super.visit(delExpr, visArg);
 	}
 }
