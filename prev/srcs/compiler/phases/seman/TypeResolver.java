@@ -7,13 +7,10 @@ import java.util.*;
 
 import compiler.common.report.*;
 import compiler.data.abstree.*;
-import compiler.data.abstree.AbsBinExpr.Oper;
 import compiler.data.abstree.visitor.*;
 import compiler.data.type.*;
-import compiler.data.type.property.*;
 import compiler.phases.seman.SymbTable.CannotFndNameException;
 import compiler.phases.seman.SymbTable.CannotInsNameException;
-import sun.awt.Symbol;
 
 /**
  * Type resolving: the result is stored in {@link SemAn#declaresType},
