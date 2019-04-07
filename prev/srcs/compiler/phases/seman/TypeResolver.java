@@ -540,5 +540,55 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 		return super.visit(assignStmt, visArg);
 	}
 	
+	@Override
+	public SemType visit(AbsStmts stmts, Phase visArg) {
+		super.visit(stmts, visArg);
+		return new SemVoidType();
+	}
+	
+	@Override
+	public SemType visit(AbsIfStmt ifStmt, Phase visArg) {
+		if(visArg == Phase.EXPR_LINK) {
+			SemType condType = ifStmt.cond.accept(this, visArg);
+			SemType thenType = ifStmt.thenStmts.accept(this, visArg);
+			SemType elseType = null;
+			if(ifStmt.elseStmts != null) {
+				 elseType = ifStmt.elseStmts.accept(this, visArg);
+			}
+			
+			if(!(condType instanceof SemBoolType)) {
+				throw new Report.Error(ifStmt.location(), "[typeResolving] Condition must be of type bool.");
+			}		
+			if(!(thenType instanceof SemVoidType)) {
+				throw new Report.Error(ifStmt.location(), "[typeResolving] Then statements must be of type void.");
+			}
+			if(elseType != null) {
+				if(!(elseType instanceof SemVoidType)) {
+					throw new Report.Error(ifStmt.location(), "[typeResolving] Else statements must be of type void.");
+				}
+			}
 
+			return new SemVoidType();
+			
+		}
+		return super.visit(ifStmt, visArg);
+	}
+	
+	@Override
+	public SemType visit(AbsWhileStmt whileStmt, Phase visArg) {
+		if(visArg == Phase.EXPR_LINK) {
+			SemType condType = whileStmt.cond.accept(this, visArg);
+			SemType doType = whileStmt.stmts.accept(this, visArg);
+			
+			if(!(condType instanceof SemBoolType)) {
+				throw new Report.Error(whileStmt.location(), "[typeResolving] Condition must be of type bool.");
+			}		
+			if(!(doType instanceof SemVoidType)) {
+				throw new Report.Error(whileStmt.location(), "[typeResolving] Do statements must be of type void.");
+			}
+			return new SemVoidType();
+			
+		}
+		return super.visit(whileStmt, visArg);
+	}
 }
