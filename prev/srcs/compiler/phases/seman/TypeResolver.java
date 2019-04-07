@@ -34,14 +34,8 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	public SemType visit(AbsSource source, Phase visArg) {
 		super.visit(source, Phase.DECLARES_TYPE_CREATION);
 
-		// System.out.println(SemAn.declaresType);
-		// System.out.println(SemAn.isType);
-
 		super.visit(source, Phase.DECLARES_TYPE_LINKING);
 		super.visit(source, Phase.EXPR_LINK);
-
-		// System.out.println(SemAn.declaresType);
-		// System.out.println(SemAn.isType);
 
 		return null;
 	}
@@ -217,10 +211,8 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			}
 			SemAn.ofType.put(atomExpr, newType);
 			return newType;
-		} else {
-			return super.visit(atomExpr, visArg);
 		}
-
+		return super.visit(atomExpr, visArg);
 	}
 
 	@Override
@@ -273,9 +265,8 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			}
 			
 			return null;
-		} else {
-			return super.visit(unExpr, visArg);
 		}
+		return super.visit(unExpr, visArg);
 	}
 	
 	@Override
@@ -342,9 +333,8 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			}
 			
 			return null;
-		} else {
-			return super.visit(binExpr, visArg);
 		}
+		return super.visit(binExpr, visArg);
 	}
 	
 	@Override
@@ -413,8 +403,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			SemType thisType = ((SemArrType)arrayType).elemType;
 			SemAn.ofType.put(arrExpr, thisType);
 			return thisType; 
-		}
-		
+		}		
 		return super.visit(arrExpr, visArg);
 	}
 	
@@ -437,7 +426,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			SemType thisType = compDecl.accept(this, visArg);
 			SemAn.ofType.put(recExpr, thisType);
 			return thisType; 
-		}
+		} 
 		return null;
 	}
 	
@@ -467,7 +456,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 						|| (argType instanceof SemCharType && parType instanceof SemCharType)
 						|| (argType instanceof SemIntType && parType instanceof SemIntType)
 						|| (argType instanceof SemPtrType && parType instanceof SemPtrType && ((SemPtrType)argType).matches((SemPtrType) parType)))) {
-					throw new Report.Error(funName.location(), "[typeResolving] Parameter or argument type not allowed");
+					throw new Report.Error(funName.location(), "[typeResolving] Parameter or argument type not allowed or does not match function definition.");
 				}
 				
 				if(!argType.matches(parType)) {
@@ -485,7 +474,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 				throw new Report.Error(funName.location(), "[typeResolving] Return type of function not allowed.");
 			}
 			
-			SemAn.ofType.put(funName	, returnType);
+			SemAn.ofType.put(funName, returnType);
 			return returnType; 
 		}
 		return super.visit(funName, visArg);
@@ -502,7 +491,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			blockExpr.stmts.accept(this, visArg);
 			
 			return type;
-		}	
+		}
 		
 		return super.visit(blockExpr, visArg);
 	}
@@ -528,6 +517,27 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			return tType;
 		}
 		return super.visit(castExpr, visArg);
+	}
+	
+	@Override
+	public SemType visit(AbsAssignStmt assignStmt, Phase visArg) {
+		if(visArg == Phase.EXPR_LINK) {
+			SemType dstType = assignStmt.dst.accept(this, visArg);
+			SemType srcType = assignStmt.src.accept(this, visArg);
+			if(!dstType.matches(srcType)) {
+				throw new Report.Error(assignStmt.location(), "[typeResolving] Assign statement types don't match.");
+			}
+			if(!(srcType instanceof SemCharType 
+					|| srcType instanceof SemCharType 
+					|| srcType instanceof SemIntType
+					|| srcType instanceof SemPtrType )) {
+				throw new Report.Error(assignStmt.location(), "[typeResolving] Type not allowed in assignment.");
+			}
+
+			return new SemVoidType();
+		}
+		
+		return super.visit(assignStmt, visArg);
 	}
 	
 
