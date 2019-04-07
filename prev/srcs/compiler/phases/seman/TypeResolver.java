@@ -591,4 +591,80 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 		}
 		return super.visit(whileStmt, visArg);
 	}
+
+	@Override
+	public SemType visit(AbsFunDef funDef, Phase visArg) {
+		if(visArg == Phase.EXPR_LINK) {
+			// Just check if everything is ok
+			
+			Vector<AbsParDecl> pars = funDef.parDecls.parDecls();
+
+			for (int i = 0; i < pars.size(); i++) {
+				AbsParDecl par = pars.get(i);
+				
+				SemType parType = par.accept(this, visArg);
+				
+				if(!( parType instanceof SemBoolType
+						|| parType instanceof SemCharType 
+						|| parType instanceof SemIntType
+						|| parType instanceof SemPtrType )) {
+					throw new Report.Error(funDef.location(), "[typeResolving] Parameter type not allowed.");
+				}
+			}
+			
+			// Return type
+			SemType returnType = funDef.type.accept(this, visArg);
+			if(!( returnType instanceof SemVoidType
+					|| returnType instanceof SemBoolType
+					|| returnType instanceof SemCharType 
+					|| returnType instanceof SemIntType
+					|| returnType instanceof SemPtrType )) {
+				throw new Report.Error(funDef.location(), "[typeResolving] Return type of function not allowed.");
+			}
+			
+			SemType exprType = funDef.value.accept(this, visArg);
+			if(!exprType.matches(returnType)) {
+				throw new Report.Error(funDef.location(), "[typeResolving] Function body type does not match return type.");
+			}
+			
+			return null; 
+		}
+		return super.visit(funDef, visArg);
+	}
+	
+	@Override
+	public SemType visit(AbsFunDecl funDef, Phase visArg) {
+		if(visArg == Phase.EXPR_LINK) {
+			// Just check if everything is ok
+			
+			Vector<AbsParDecl> pars = funDef.parDecls.parDecls();
+
+			for (int i = 0; i < pars.size(); i++) {
+				AbsParDecl par = pars.get(i);
+				
+				SemType parType = par.accept(this, visArg);
+				
+				if(!( parType instanceof SemBoolType
+						|| parType instanceof SemCharType 
+						|| parType instanceof SemIntType
+						|| parType instanceof SemPtrType )) {
+					throw new Report.Error(funDef.location(), "[typeResolving] Parameter type not allowed.");
+				}
+			}
+			
+			// Return type
+			SemType returnType = funDef.type.accept(this, visArg);
+			if(!( returnType instanceof SemVoidType
+					|| returnType instanceof SemBoolType
+					|| returnType instanceof SemCharType 
+					|| returnType instanceof SemIntType
+					|| returnType instanceof SemPtrType )) {
+				throw new Report.Error(funDef.location(), "[typeResolving] Return type of function not allowed.");
+			}
+						
+			return null; 
+		}
+		return super.visit(funDef, visArg);
+	}
+	
 }
