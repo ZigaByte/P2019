@@ -21,7 +21,7 @@ import compiler.phases.seman.SymbTable.CannotInsNameException;
 public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 
 	enum Phase {
-		DECLARES_TYPE_CREATION, DECLARES_TYPE_LINKING, EXPR_LINK, TYPE_RESOLUTION
+		DECLARES_TYPE_CREATION, DECLARES_TYPE_LINKING, DECLARES_CHECK, EXPR_LINK
 	}
 
 	/** Symbol tables of individual record types. */
@@ -30,10 +30,9 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	@Override
 	public SemType visit(AbsSource source, Phase visArg) {
 		super.visit(source, Phase.DECLARES_TYPE_CREATION);
-
 		super.visit(source, Phase.DECLARES_TYPE_LINKING);
+		super.visit(source, Phase.DECLARES_CHECK);
 		super.visit(source, Phase.EXPR_LINK);
-
 		return null;
 	}
 
@@ -41,8 +40,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	public SemType visit(AbsTypDecl typDecl, Phase visArg) {
 		if (visArg == Phase.DECLARES_TYPE_CREATION) {
 			SemAn.declaresType.put(typDecl, new SemNamedType(typDecl.name));
-		}
-		if (visArg == Phase.DECLARES_TYPE_LINKING) {
+		}else if (visArg == Phase.DECLARES_TYPE_LINKING) {
 			SemNamedType namedType = SemAn.declaresType.get(typDecl);
 			namedType.define(typDecl.type.accept(this, Phase.DECLARES_TYPE_LINKING));
 		}
@@ -62,8 +60,6 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			if(newType instanceof SemVoidType) {
 				throw new Report.Error(varDecl.location(), "[typeResolving] Variable may not be of type void");
 			}
-			// Todo: insert???
-			//SemAn.ofType.put(varDecl.name, newType);
 			return newType;
 		}
 		return super.visit(varDecl, visArg);
@@ -103,19 +99,26 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	@Override
 	public SemType visit(AbsArrType arrType, Phase visArg) {
 		if (visArg == Phase.DECLARES_TYPE_LINKING) {
-			// TODO WHAT about constants as variables?????
 			if (arrType.len instanceof AbsAtomExpr) {
-				int len = Integer.parseInt(((AbsAtomExpr) arrType.len).expr);
-				SemType elementType = arrType.elemType.accept(this, visArg);
-				if (elementType instanceof SemVoidType) {
-					throw new Report.Error(arrType, String.format("[typeResolving] Void type not allowed in array."));
+				try {
+					int len = Integer.parseInt(((AbsAtomExpr) arrType.len).expr);
+					SemType elementType = arrType.elemType.accept(this, visArg);
+					
+					if (elementType instanceof SemVoidType) {
+						throw new Report.Error(arrType, String.format("[typeResolving] Void type not allowed in array."));
+					}
+					SemType newType = new SemArrType(len, elementType);
+					SemAn.isType.put(arrType, newType);
+					return newType;
+				}catch (Exception e) {
+					throw new Report.Error(arrType, String.format("[typeResolving] Array length must be a constant."));
 				}
-				SemType newType = new SemArrType(len, elementType);
-				SemAn.isType.put(arrType, newType);
-				return newType;
 			}
-			System.out.println("IDK, ERROR, NOT AN INTERGER CONSTANT IN THE ARRAY");
-		}else if(visArg == Phase.EXPR_LINK){
+		} else if(visArg == Phase.DECLARES_CHECK) {
+			if(((SemArrType)SemAn.isType.get(arrType)).elemType.matches(new SemVoidType())) {
+				throw new Report.Error(arrType, String.format("[typeResolving] Void type not allowed in array."));
+			}
+		} else if(visArg == Phase.EXPR_LINK){
 			return SemAn.isType.get(arrType);
 		}
 		return super.visit(arrType, visArg);
@@ -159,6 +162,13 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			symbTables.put(newType, recTable);
 			
 			return newType;
+		} else if(visArg == Phase.DECLARES_CHECK) {
+			SemRecType rec = (SemRecType)SemAn.isType.get(recType);
+			for(SemType elementType : rec.compTypes()) {
+				if(elementType.matches(new SemVoidType())) {
+					throw new Report.Error(recType, String.format("[typeResolving] Void type not allowed in record."));
+				}	
+			}
 		}else if(visArg == Phase.EXPR_LINK){
 			return SemAn.isType.get(recType);
 		}
