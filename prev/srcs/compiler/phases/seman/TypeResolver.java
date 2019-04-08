@@ -213,7 +213,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 				newType = new SemIntType();
 				break;
 			case STR:
-				// WTFFFF?????? TODO
+				newType = new SemPtrType(new SemCharType());
 				break;
 			}
 			SemAn.ofType.put(atomExpr, newType);
