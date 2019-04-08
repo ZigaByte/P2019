@@ -331,7 +331,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 				if(!( (it1 instanceof SemCharType && it2 instanceof SemCharType)
 						|| (it1 instanceof SemIntType && it2 instanceof SemIntType)
 						|| (it1 instanceof SemPtrType && it2 instanceof SemPtrType && ((SemPtrType)it1).matches((SemPtrType) it2)))) {
-					throw new Report.Error(binExpr.location(), "[typeResolving] Expressions around <,<=,>,>= must be of type int, char, bool or ptr. The two types must be the same.");
+					throw new Report.Error(binExpr.location(), "[typeResolving] Expressions around <,<=,>,>= must be of type int, char or ptr. The two types must be the same.");
 				}
 				SemType thisType = new SemBoolType();
 				SemAn.ofType.put(binExpr, thisType);
@@ -534,7 +534,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			if(!dstType.matches(srcType)) {
 				throw new Report.Error(assignStmt.location(), "[typeResolving] Assign statement types don't match.");
 			}
-			if(!(srcType instanceof SemCharType 
+			if(!(srcType instanceof SemBoolType 
 					|| srcType instanceof SemCharType 
 					|| srcType instanceof SemIntType
 					|| srcType instanceof SemPtrType )) {
