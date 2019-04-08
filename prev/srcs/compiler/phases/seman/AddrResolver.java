@@ -23,12 +23,15 @@ public class AddrResolver extends AbsFullVisitor<Boolean, Object> {
 	
 	@Override
 	public Boolean visit(AbsUnExpr unExpr, Object visArg) {
-		if(unExpr.oper == Oper.ADDR) {
+		if(unExpr.oper == Oper.DATA) {
 			SemAn.isAddr.put(unExpr, true);	
+			super.visit(unExpr, visArg);
+			return true;
 		} else {
 			SemAn.isAddr.put(unExpr, false);	
+			super.visit(unExpr, visArg);
+			return false;
 		}
-		return super.visit(unExpr, visArg);
 	}
 	
 	@Override
@@ -41,6 +44,7 @@ public class AddrResolver extends AbsFullVisitor<Boolean, Object> {
 	public Boolean visit(AbsArrExpr arrExpr, Object visArg) {
 		Boolean isAddr = arrExpr.array.accept(this, visArg);
 		SemAn.isAddr.put(arrExpr, isAddr);
+		arrExpr.index.accept(this, visArg);
 		
 		return SemAn.isAddr.get(arrExpr);
 	}
@@ -73,6 +77,8 @@ public class AddrResolver extends AbsFullVisitor<Boolean, Object> {
 	public Boolean visit(AbsRecExpr recExpr, Object visArg) {
 		Boolean isAddr = recExpr.record.accept(this, visArg);
 		SemAn.isAddr.put(recExpr, isAddr);
+		
+		recExpr.comp.accept(this, visArg);
 		
 		return SemAn.isAddr.get(recExpr);
 	}
