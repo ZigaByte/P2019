@@ -67,7 +67,9 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	
 	@Override
 	public SemType visit(AbsVarName varName, Phase visArg) {
-		return SemAn.declaredAt.get(varName).accept(this, visArg);
+		SemType type = SemAn.declaredAt.get(varName).accept(this, visArg);
+		SemAn.ofType.put(varName, type);
+		return type;
 	}
 	
 	@Override
@@ -102,7 +104,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			if (arrType.len instanceof AbsAtomExpr) {
 				try {
 					int len = Integer.parseInt(((AbsAtomExpr) arrType.len).expr);
-					SemType elementType = arrType.elemType.accept(this, visArg);
+					SemType elementType = arrType.elemType.accept(this, visArg).actualType();
 					
 					if (elementType instanceof SemVoidType) {
 						throw new Report.Error(arrType, String.format("[typeResolving] Void type not allowed in array."));
@@ -225,10 +227,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	@Override
 	public SemType visit(AbsUnExpr unExpr, Phase visArg) {
 		if (visArg == Phase.EXPR_LINK) {
-			SemType it = unExpr.subExpr.accept(this, visArg);
-			while (it instanceof SemNamedType) {
-				it = ((SemNamedType)it).type;
-			}
+			SemType it = unExpr.subExpr.accept(this, visArg).actualType();
 			
 			switch (unExpr.oper) {
 			case NOT:{
@@ -279,14 +278,8 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	@Override
 	public SemType visit(AbsBinExpr binExpr, Phase visArg) {
 		if (visArg == Phase.EXPR_LINK) {
-			SemType it1 = binExpr.fstExpr.accept(this, visArg);
-			SemType it2 = binExpr.sndExpr.accept(this, visArg);
-			while (it1 instanceof SemNamedType) {
-				it1 = ((SemNamedType)it1).type;
-			}
-			while (it2 instanceof SemNamedType) {
-				it2 = ((SemNamedType)it2).type;
-			}
+			SemType it1 = binExpr.fstExpr.accept(this, visArg).actualType();
+			SemType it2 = binExpr.sndExpr.accept(this, visArg).actualType();
 			
 			switch (binExpr.oper) {
 			case AND:
@@ -347,10 +340,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	@Override
 	public SemType visit(AbsNewExpr newExpr, Phase visArg) {
 		if(visArg == Phase.EXPR_LINK) {
-			SemType it = newExpr.type.accept(this, visArg);
-			while (it instanceof SemNamedType) {
-				it = ((SemNamedType)it).type;
-			}
+			SemType it = newExpr.type.accept(this, visArg).actualType();
 			
 			if(it instanceof SemVoidType) {
 				throw new Report.Error(newExpr.location(), String.format("[typeResolving] Expression in statement new must not be of type void."));	
@@ -366,10 +356,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	@Override
 	public SemType visit(AbsDelExpr delExpr, Phase visArg) {
 		if(visArg == Phase.EXPR_LINK) {
-			SemType it = delExpr.expr.accept(this, visArg);
-			while (it instanceof SemNamedType) {
-				it = ((SemNamedType)it).type;
-			}
+			SemType it = delExpr.expr.accept(this, visArg).actualType();
 			
 			if(!(it instanceof SemPtrType)) {
 				throw new Report.Error(delExpr.location(), String.format("[typeResolving] Expression in statement new must be a pointer."));	
@@ -389,15 +376,9 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	@Override
 	public SemType visit(AbsArrExpr arrExpr, Phase visArg) {
 		if(visArg == Phase.EXPR_LINK) {
-			SemType arrayType = arrExpr.array.accept(this, visArg);
-			while (arrayType instanceof SemNamedType) {
-				arrayType = ((SemNamedType)arrayType).type;
-			}
+			SemType arrayType = arrExpr.array.accept(this, visArg).actualType();
 		
-			SemType index = arrExpr.index.accept(this, visArg);
-			while (index instanceof SemNamedType) {
-				index = ((SemNamedType)index).type;
-			}
+			SemType index = arrExpr.index.accept(this, visArg).actualType();
 			
 			if(!(arrayType instanceof SemArrType)) {
 				throw new Report.Error(arrExpr.location(), String.format("[typeResolving] Expression before [] must be of type array."));	
@@ -418,7 +399,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	public SemType visit(AbsRecExpr recExpr, Phase visArg) {
 		if(visArg == Phase.EXPR_LINK) {
 			// First perform a name check for the component name
-			SemRecType recType = (SemRecType) recExpr.record.accept(this, visArg);
+			SemRecType recType = (SemRecType) recExpr.record.accept(this, visArg).actualType();
 			SymbTable table = symbTables.get(recType);
 			
 			AbsDecl compDecl = null;
@@ -430,8 +411,9 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			}
 			
 			// Then connect the type
-			SemType thisType = compDecl.accept(this, visArg);
+			SemType thisType = compDecl.accept(this, visArg).actualType();
 			SemAn.ofType.put(recExpr, thisType);
+			SemAn.ofType.put(recExpr.comp, thisType);
 			return thisType; 
 		} 
 		return null;
@@ -456,8 +438,8 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 				AbsExpr arg = args.get(i);
 				AbsParDecl par = pars.get(i);
 				
-				SemType argType = arg.accept(this, visArg);
-				SemType parType = par.accept(this, visArg);
+				SemType argType = arg.accept(this, visArg).actualType();
+				SemType parType = par.accept(this, visArg).actualType();
 				
 				if(!( (argType instanceof SemBoolType && parType instanceof SemBoolType)
 						|| (argType instanceof SemCharType && parType instanceof SemCharType)
@@ -472,7 +454,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			}
 			
 			// Return type
-			SemType returnType = funDecl.type.accept(this, visArg);
+			SemType returnType = funDecl.type.accept(this, visArg).actualType();
 			if(!( returnType instanceof SemVoidType
 					|| returnType instanceof SemBoolType
 					|| returnType instanceof SemCharType 
@@ -507,8 +489,8 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	public SemType visit(AbsCastExpr castExpr, Phase visArg) {
 
 		if(visArg == Phase.EXPR_LINK) {
-			SemType eType = castExpr.expr.accept(this, visArg);
-			SemType tType = castExpr.type.accept(this, visArg);
+			SemType eType = castExpr.expr.accept(this, visArg).actualType();
+			SemType tType = castExpr.type.accept(this, visArg).actualType();
 			if(!(eType instanceof SemCharType 
 					|| eType instanceof SemIntType
 					|| eType instanceof SemPtrType )) {
@@ -529,8 +511,8 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	@Override
 	public SemType visit(AbsAssignStmt assignStmt, Phase visArg) {
 		if(visArg == Phase.EXPR_LINK) {
-			SemType dstType = assignStmt.dst.accept(this, visArg);
-			SemType srcType = assignStmt.src.accept(this, visArg);
+			SemType dstType = assignStmt.dst.accept(this, visArg).actualType();
+			SemType srcType = assignStmt.src.accept(this, visArg).actualType();
 			if(!dstType.matches(srcType)) {
 				throw new Report.Error(assignStmt.location(), "[typeResolving] Assign statement types don't match.");
 			}
@@ -556,11 +538,11 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	@Override
 	public SemType visit(AbsIfStmt ifStmt, Phase visArg) {
 		if(visArg == Phase.EXPR_LINK) {
-			SemType condType = ifStmt.cond.accept(this, visArg);
-			SemType thenType = ifStmt.thenStmts.accept(this, visArg);
+			SemType condType = ifStmt.cond.accept(this, visArg).actualType();
+			SemType thenType = ifStmt.thenStmts.accept(this, visArg).actualType();
 			SemType elseType = null;
 			if(ifStmt.elseStmts != null) {
-				 elseType = ifStmt.elseStmts.accept(this, visArg);
+				 elseType = ifStmt.elseStmts.accept(this, visArg).actualType();
 			}
 			
 			if(!(condType instanceof SemBoolType)) {
@@ -584,8 +566,8 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	@Override
 	public SemType visit(AbsWhileStmt whileStmt, Phase visArg) {
 		if(visArg == Phase.EXPR_LINK) {
-			SemType condType = whileStmt.cond.accept(this, visArg);
-			SemType doType = whileStmt.stmts.accept(this, visArg);
+			SemType condType = whileStmt.cond.accept(this, visArg).actualType();
+			SemType doType = whileStmt.stmts.accept(this, visArg).actualType();
 			
 			if(!(condType instanceof SemBoolType)) {
 				throw new Report.Error(whileStmt.location(), "[typeResolving] Condition must be of type bool.");
@@ -609,7 +591,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			for (int i = 0; i < pars.size(); i++) {
 				AbsParDecl par = pars.get(i);
 				
-				SemType parType = par.accept(this, visArg);
+				SemType parType = par.accept(this, visArg).actualType();
 				
 				if(!( parType instanceof SemBoolType
 						|| parType instanceof SemCharType 
@@ -620,7 +602,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			}
 			
 			// Return type
-			SemType returnType = funDef.type.accept(this, visArg);
+			SemType returnType = funDef.type.accept(this, visArg).actualType();
 			if(!( returnType instanceof SemVoidType
 					|| returnType instanceof SemBoolType
 					|| returnType instanceof SemCharType 
@@ -629,7 +611,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 				throw new Report.Error(funDef.location(), "[typeResolving] Return type of function not allowed.");
 			}
 			
-			SemType exprType = funDef.value.accept(this, visArg);
+			SemType exprType = funDef.value.accept(this, visArg).actualType();
 			if(!exprType.matches(returnType)) {
 				throw new Report.Error(funDef.location(), "[typeResolving] Function body type does not match return type.");
 			}
@@ -649,7 +631,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			for (int i = 0; i < pars.size(); i++) {
 				AbsParDecl par = pars.get(i);
 				
-				SemType parType = par.accept(this, visArg);
+				SemType parType = par.accept(this, visArg).actualType();
 				
 				if(!( parType instanceof SemBoolType
 						|| parType instanceof SemCharType 
@@ -660,7 +642,7 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 			}
 			
 			// Return type
-			SemType returnType = funDef.type.accept(this, visArg);
+			SemType returnType = funDef.type.accept(this, visArg).actualType();
 			if(!( returnType instanceof SemVoidType
 					|| returnType instanceof SemBoolType
 					|| returnType instanceof SemCharType 
