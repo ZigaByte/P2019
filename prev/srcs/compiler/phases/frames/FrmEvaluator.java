@@ -47,7 +47,40 @@ public class FrmEvaluator extends AbsFullVisitor<Object, FrmEvaluator.Context> {
 	private class RecContext extends Context {
 		public long compsSize = 0;
 	}
+	
+	@Override
+	public Object visit(AbsSource source, Context visArg) {
+		FunContext fc = new FunContext();
+		fc.depth = 0;
+		return super.visit(source, fc);
+	}
 
-        //TODO
-
+	@Override
+	public Object visit(AbsFunDef funDef, Context visArg) {
+		FunContext funContext = new FunContext();
+		funContext.depth = ((FunContext)visArg).depth + 1;
+		
+		super.visit(funDef, funContext);
+		
+		Frame frame = new Frame(new Label(funDef.name), funContext.depth, funContext.locsSize, funContext.argsSize);
+		Frames.frames.put(funDef, frame);
+		return null;
+	}
+	
+	@Override
+	public Object visit(AbsVarDecl varDecl, Context visArg) {
+		SemType type = SemAn.isType.get(varDecl.type);
+		((FunContext)visArg).locsSize += type.size();
+		
+		return null;
+	}
+	
+	@Override
+	public Object visit(AbsParDecl parDecl, Context visArg) {
+		SemType type = SemAn.isType.get(parDecl.type);
+		((FunContext)visArg).locsSize += type.size();
+		
+		return super.visit(parDecl, visArg);
+	}
+	
 }
