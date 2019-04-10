@@ -117,8 +117,11 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 				}
 			}
 		} else if(visArg == Phase.DECLARES_CHECK) {
-			if(((SemArrType)SemAn.isType.get(arrType)).elemType.matches(new SemVoidType())) {
-				throw new Report.Error(arrType, String.format("[typeResolving] Void type not allowed in array."));
+			SemType type = SemAn.isType.get(arrType);
+			if(type != null) {
+				if(((SemArrType)type).elemType.matches(new SemVoidType())) {
+					throw new Report.Error(arrType, String.format("[typeResolving] Void type not allowed in array."));
+				}
 			}
 		} else if(visArg == Phase.EXPR_LINK){
 			return SemAn.isType.get(arrType);
