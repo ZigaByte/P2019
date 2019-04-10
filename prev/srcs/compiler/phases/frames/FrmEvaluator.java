@@ -34,7 +34,7 @@ public class FrmEvaluator extends AbsFullVisitor<Object, FrmEvaluator.Context> {
 	private class FunContext extends Context {
 		public int depth = 0;
 		public long locsSize = 0;
-		public long argsSize = 0;
+		public long argsSize = 0; // Start with Static link size
 		public long parsSize = new SemPtrType(new SemVoidType()).size();
 	}
 
@@ -47,6 +47,8 @@ public class FrmEvaluator extends AbsFullVisitor<Object, FrmEvaluator.Context> {
 	private class RecContext extends Context {
 		public long compsSize = 0;
 	}
+	
+	public int functionCounter = 0;
 	
 	@Override
 	public Object visit(AbsSource source, Context visArg) {
@@ -62,7 +64,11 @@ public class FrmEvaluator extends AbsFullVisitor<Object, FrmEvaluator.Context> {
 		
 		super.visit(funDef, funContext);
 		
-		Frame frame = new Frame(new Label(funDef.name), funContext.depth, funContext.locsSize, funContext.argsSize);
+		String label = funContext.depth == 1 ? funDef.name : "L" + functionCounter++;
+		
+		funContext.argsSize += new SemPtrType(new SemVoidType()).size(); // Add the Static link
+		
+		Frame frame = new Frame(new Label(label), funContext.depth, funContext.locsSize, funContext.argsSize);
 		Frames.frames.put(funDef, frame);
 		return null;
 	}
@@ -87,8 +93,13 @@ public class FrmEvaluator extends AbsFullVisitor<Object, FrmEvaluator.Context> {
 	}
 	
 	@Override
+	public Object visit(AbsTypDecl typDecl, Context visArg) {
+		return super.visit(typDecl, new RecContext());
+	}
+	
+	@Override
 	public Object visit(AbsCompDecl compDecl, Context visArg) {
-		RecContext recContext = (RecContext)visArg;
+		RecContext recContext = (RecContext) visArg;
 		
 		SemType type = SemAn.isType.get(compDecl.type);
 		recContext.compsSize += type.size();
@@ -100,8 +111,12 @@ public class FrmEvaluator extends AbsFullVisitor<Object, FrmEvaluator.Context> {
 	
 	@Override
 	public Object visit(AbsParDecl parDecl, Context visArg) {
+		FunContext funContext = (FunContext)visArg;
+		
 		SemType type = SemAn.isType.get(parDecl.type);
-		((FunContext)visArg).locsSize += type.size();
+		funContext.parsSize += type.size();
+		
+		Frames.accesses.put(parDecl, new RelAccess(type.size(), funContext.parsSize - type.size(), funContext.depth));
 		
 		return super.visit(parDecl, visArg);
 	}
@@ -111,7 +126,6 @@ public class FrmEvaluator extends AbsFullVisitor<Object, FrmEvaluator.Context> {
 		FunContext funContext = (FunContext)visArg;
 		
 		int argsSize = (Integer)funName.args.accept(this, visArg);
-		
 		funContext.argsSize = Math.max(argsSize, funContext.argsSize);
 		
 		return super.visit(funName, visArg);
