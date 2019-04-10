@@ -18,7 +18,8 @@ public class AddrResolver extends AbsFullVisitor<Boolean, Object> {
 	@Override
 	public Boolean visit(AbsAtomExpr atomExpr, Object visArg) {
 		SemAn.isAddr.put(atomExpr, false);
-		return super.visit(atomExpr, visArg);
+		super.visit(atomExpr, visArg);
+		return false;
 	}
 	
 	@Override
@@ -37,7 +38,8 @@ public class AddrResolver extends AbsFullVisitor<Boolean, Object> {
 	@Override
 	public Boolean visit(AbsBinExpr binExpr, Object visArg) {
 		SemAn.isAddr.put(binExpr, false);
-		return super.visit(binExpr, visArg);
+		super.visit(binExpr, visArg);
+		return false;
 	}
 	
 	@Override
@@ -52,25 +54,29 @@ public class AddrResolver extends AbsFullVisitor<Boolean, Object> {
 	@Override
 	public Boolean visit(AbsBlockExpr blockExpr, Object visArg) {
 		SemAn.isAddr.put(blockExpr, false);
-		return super.visit(blockExpr, visArg);
+		super.visit(blockExpr, visArg);
+		return false;
 	}
 	
 	@Override
 	public Boolean visit(AbsCastExpr castExpr, Object visArg) {
 		SemAn.isAddr.put(castExpr, false);
-		return super.visit(castExpr, visArg);
+		super.visit(castExpr, visArg);
+		return false;
 	}
 	
 	@Override
 	public Boolean visit(AbsDelExpr delExpr, Object visArg) {
 		SemAn.isAddr.put(delExpr, false);
-		return super.visit(delExpr, visArg);
+		super.visit(delExpr, visArg);
+		return false;
 	}
 	
 	@Override
 	public Boolean visit(AbsNewExpr newExpr, Object visArg) {
 		SemAn.isAddr.put(newExpr, false);
-		return super.visit(newExpr, visArg);
+		super.visit(newExpr, visArg);
+		return false;
 	}
 	
 	@Override
@@ -86,12 +92,12 @@ public class AddrResolver extends AbsFullVisitor<Boolean, Object> {
 	@Override
 	public Boolean visit(AbsVarName varName, Object visArg) {
 		SemAn.isAddr.put(varName, true);
-		return super.visit(varName, visArg);
+		super.visit(varName, visArg);
+		return true;
 	}
 	
 	@Override
 	public Boolean visit(AbsAssignStmt assignStmt, Object visArg) {
-		// TODO: Perform actual check with assinment statements
 		assignStmt.src.accept(this, visArg);
 		assignStmt.dst.accept(this, visArg);
 		
