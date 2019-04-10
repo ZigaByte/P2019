@@ -69,10 +69,33 @@ public class FrmEvaluator extends AbsFullVisitor<Object, FrmEvaluator.Context> {
 	
 	@Override
 	public Object visit(AbsVarDecl varDecl, Context visArg) {
-		SemType type = SemAn.isType.get(varDecl.type);
-		((FunContext)visArg).locsSize += type.size();
+		FunContext funContext = (FunContext)visArg;
 		
-		return null;
+		SemType type = SemAn.isType.get(varDecl.type);
+		funContext.locsSize += type.size();
+
+		Access access = null;
+		if(funContext.depth == 0) {
+			access = new AbsAccess(type.size(), new Label(varDecl.name), null);		
+		}else {
+			access = new RelAccess(type.size(), -funContext.locsSize, funContext.depth);
+		}
+		Frames.accesses.put(varDecl, access);
+	
+		
+		return super.visit(varDecl, new RecContext());
+	}
+	
+	@Override
+	public Object visit(AbsCompDecl compDecl, Context visArg) {
+		RecContext recContext = (RecContext)visArg;
+		
+		SemType type = SemAn.isType.get(compDecl.type);
+		recContext.compsSize += type.size();
+		
+		Frames.accesses.put(compDecl, new RelAccess(type.size(), recContext.compsSize - type.size(), 0));
+		
+		return super.visit(compDecl, visArg);
 	}
 	
 	@Override
@@ -81,6 +104,27 @@ public class FrmEvaluator extends AbsFullVisitor<Object, FrmEvaluator.Context> {
 		((FunContext)visArg).locsSize += type.size();
 		
 		return super.visit(parDecl, visArg);
+	}
+	
+	@Override
+	public Object visit(AbsFunName funName, Context visArg) {
+		FunContext funContext = (FunContext)visArg;
+		
+		int argsSize = (Integer)funName.args.accept(this, visArg);
+		
+		funContext.argsSize = Math.max(argsSize, funContext.argsSize);
+		
+		return super.visit(funName, visArg);
+	}
+	
+	@Override
+	public Object visit(AbsArgs args, Context visArg) {
+		int size = 0;
+		for(AbsExpr expr: args.args()) {
+			SemType type = SemAn.ofType.get(expr);
+			size += type.size();
+		}
+		return size;
 	}
 	
 }
