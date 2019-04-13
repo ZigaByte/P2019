@@ -401,8 +401,15 @@ public class TypeResolver extends AbsFullVisitor<SemType, TypeResolver.Phase> {
 	@Override
 	public SemType visit(AbsRecExpr recExpr, Phase visArg) {
 		if(visArg == Phase.EXPR_LINK) {
-			// First perform a name check for the component name
-			SemRecType recType = (SemRecType) recExpr.record.accept(this, visArg).actualType();
+			// First perform a name check for the record name
+			SemType type = recExpr.record.accept(this, visArg).actualType();
+			SemRecType recType = null;
+			if(type instanceof SemRecType) {
+				recType = (SemRecType) type;
+			} else {
+				throw new Report.Error(recExpr.location(), "[nameResolution] Record type does not exist.");
+			}
+			
 			SymbTable table = symbTables.get(recType);
 			
 			AbsDecl compDecl = null;
