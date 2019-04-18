@@ -1,53 +1,46 @@
-typ _hi : int;
-typ _hi : char;
-typ _hi : bool;
-var _hi : void;
-typ _hi : arr[1+5]ptr test;
-typ _hi : rec(a:int, b:char, c:int);
-var _hi : rec(a:int);
-typ _hi : ptr bool;
-var _hi : haha;
-typ _hi : (int);
+fun wrapper(): int = {
+    instance.a = 3;
+    instance.b = new (arr [256] char);
+    instance.c = new (string);
 
-fun test():int;
-fun test():char = {1;:1};
-fun test(a:int, b:char):char = {1;:1};
-fun test(a:int, b:char):char = {
-1;:1
-where fun b():int={5;:a+b};
-};
+    c = (1 : int);
 
-fun allExpr(a:ptr bl5a):int = {
-	"Hello, world!";
-	test = 5;
-	test = -5;
-	test = 1-5;
-	test = 1|5;
-	test = 1&5;
-	test = 1==5;
-	test = lol;
-	test = lol(a,b,c);
-	test = lol[5+6*i];
-	test = new(int);
-	test = del(test);
-	i = (test:int);
-	i = (test) + 1 + (test * (tset));
-	
-	if 8 < 9+1 then
-		5+91+2711-(-2-2)*5 ==1;
-	end;
-	
-	
-	if 8 < 9+1 then
-		a = !haha == 1;
-	else
-		a 
-		= a+b;
-	end;
-	while true do
-		"Jaz bom programiru";
-		test;
-	end;
-	:123
-	where var i:int;
+    : strcmp(instance.b, instance.c)
+
+    where
+
+        typ myrecord: rec(a: int, b: ptr string, c: ptr string);
+        var instance: myrecord;
+
+        typ string: arr [256] char;
+        var a: string;
+        var b: string;
+
+        var c: int;
+
+        fun strcmp(s1: ptr string, s2: ptr string): int = {
+            same = true;
+            same = check(i);
+
+            : i
+
+            where
+                var i: int;
+                var same: bool;
+
+                fun check(n: int): bool = {
+                    if n < 256 then
+                        r = true;
+                    else
+                        r = false;
+                    end;
+                    : r
+                    where
+                        var r: bool;
+                };
+
+        };
+
+        fun fff(): int = ggg() + 4;
+        fun ggg(): int = fff() + 2;
 };
