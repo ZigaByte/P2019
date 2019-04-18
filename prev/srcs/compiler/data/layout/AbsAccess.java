@@ -38,9 +38,7 @@ public class AbsAccess extends Access {
 	 * @param label Offset of a variable at an absolute address.
 	 */
 	public AbsAccess(long size, Label label) {
-		super(size);
-		this.label = label;
-		this.init = null;
+		this(size, label, null);
 	}
 
 	@Override

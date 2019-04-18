@@ -48,8 +48,6 @@ public class FrmEvaluator extends AbsFullVisitor<Object, FrmEvaluator.Context> {
 		public long compsSize = 0;
 	}
 	
-	public int functionCounter = 0;
-	
 	@Override
 	public Object visit(AbsSource source, Context visArg) {
 		FunContext fc = new FunContext();
@@ -64,11 +62,11 @@ public class FrmEvaluator extends AbsFullVisitor<Object, FrmEvaluator.Context> {
 		
 		super.visit(funDef, funContext);
 		
-		String label = funContext.depth == 1 ? funDef.name : "L" + functionCounter++;
+		Label label = funContext.depth == 1 ? new Label(funDef.name) : new Label();
 		
 		funContext.argsSize += new SemPtrType(new SemVoidType()).size(); // Add the Static link
 		
-		Frame frame = new Frame(new Label(label), funContext.depth, funContext.locsSize, funContext.argsSize);
+		Frame frame = new Frame(label, funContext.depth, funContext.locsSize, funContext.argsSize);
 		Frames.frames.put(funDef, frame);
 		return null;
 	}
@@ -82,7 +80,7 @@ public class FrmEvaluator extends AbsFullVisitor<Object, FrmEvaluator.Context> {
 
 		Access access = null;
 		if(funContext.depth == 0) {
-			access = new AbsAccess(type.size(), new Label(varDecl.name), null);		
+			access = new AbsAccess(type.size(), new Label(varDecl.name));		
 		}else {
 			access = new RelAccess(type.size(), -funContext.locsSize, funContext.depth);
 		}
@@ -139,6 +137,20 @@ public class FrmEvaluator extends AbsFullVisitor<Object, FrmEvaluator.Context> {
 			size += type.size();
 		}
 		return size;
+	}
+	
+	@Override
+	public Object visit(AbsAtomExpr atomExpr, Context visArg) {
+		switch (atomExpr.type) {
+		case STR: {
+			AbsAccess stringAccess = new AbsAccess(8 * (atomExpr.expr.length()-1), new Label(), atomExpr.expr);
+			Frames.strings.put(atomExpr, stringAccess);
+			break;
+		}
+		default:
+			break;
+		}
+		return super.visit(atomExpr, visArg);
 	}
 	
 }
