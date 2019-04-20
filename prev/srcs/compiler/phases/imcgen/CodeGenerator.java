@@ -153,14 +153,22 @@ public class CodeGenerator extends AbsFullVisitor<Object, Stack<Frame>> {
 	
 	@Override
 	public Object visit(AbsDelExpr delExpr, Stack<Frame> visArg) {
-		// TODO Auto-generated method stub
-		return super.visit(delExpr, visArg);
+		Vector<ImcExpr> args = new Vector<>();
+		args.add((ImcExpr)delExpr.expr.accept(this, visArg));
+		ImcGen.exprImCode.put(delExpr, new ImcCALL(new Label("del"), args));
+		return ImcGen.exprImCode.get(delExpr);
 	}
 	
 	@Override
 	public Object visit(AbsNewExpr newExpr, Stack<Frame> visArg) {
 		// TODO Auto-generated method stub
-		return super.visit(newExpr, visArg);
+		long size = SemAn.isType.get(newExpr.type).actualType().size();
+		
+		Vector<ImcExpr> args = new Vector<>();
+		args.add(new ImcCONST(size));
+		
+		ImcGen.exprImCode.put(newExpr, new ImcCALL(new Label("new"), args));
+		return ImcGen.exprImCode.get(newExpr);
 	}
 	
 	@Override
@@ -205,12 +213,10 @@ public class CodeGenerator extends AbsFullVisitor<Object, Stack<Frame>> {
 	
 	@Override
 	public ImcExpr visit(AbsBlockExpr blockExpr, Stack<Frame> visArg) {
-		// TODO: Maybe handle stmts??
 		blockExpr.stmts.accept(this, visArg);		
 		
 		ImcExpr expr = (ImcExpr) blockExpr.expr.accept(this, visArg);
 		
-
 		ImcGen.exprImCode.put(blockExpr, expr);
 		return ImcGen.exprImCode.get(blockExpr);
 	}
