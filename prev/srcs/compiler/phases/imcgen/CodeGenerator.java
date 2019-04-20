@@ -36,6 +36,8 @@ import compiler.data.imcode.ImcCJUMP;
 import compiler.data.imcode.ImcCONST;
 import compiler.data.imcode.ImcESTMT;
 import compiler.data.imcode.ImcExpr;
+import compiler.data.imcode.ImcJUMP;
+import compiler.data.imcode.ImcLABEL;
 import compiler.data.imcode.ImcMEM;
 import compiler.data.imcode.ImcMOVE;
 import compiler.data.imcode.ImcNAME;
@@ -241,19 +243,59 @@ public class CodeGenerator extends AbsFullVisitor<Object, Stack<Frame>> {
 	@Override
 	public Object visit(AbsIfStmt ifStmt, Stack<Frame> visArg) {
 		ImcExpr cond = (ImcExpr) ifStmt.cond.accept(this, visArg);
-		ifStmt.thenStmts.accept(this, visArg);
-		ifStmt.elseStmts.accept(this, visArg);
-		// TODO labels
-		ImcGen.stmtImCode.put(ifStmt, new ImcCJUMP(cond, new Label(), new Label()));
+		
+		ImcSTMTS thenStmts = (ImcSTMTS)ifStmt.thenStmts.accept(this, visArg);
+		ImcSTMTS elseStmts = (ImcSTMTS)ifStmt.elseStmts.accept(this, visArg);
+		
+		Vector<ImcStmt> stmts = new Vector<ImcStmt>();
+		
+		Label thenLabel = new Label();
+		Label elseLabel = new Label();
+		Label endLabel = new Label();
+		
+		stmts.add(new ImcCJUMP(cond, thenLabel, elseLabel));
+		stmts.add(new ImcLABEL(thenLabel));
+		stmts.add(thenStmts);
+		stmts.add(new ImcJUMP(endLabel));
+		stmts.add(new ImcLABEL(elseLabel));
+		stmts.add(elseStmts);
+		stmts.add(new ImcJUMP(endLabel));
+		stmts.add(new ImcLABEL(endLabel));
+		
+		ImcGen.stmtImCode.put(ifStmt, new ImcSTMTS(stmts));
 		return ImcGen.stmtImCode.get(ifStmt);	
 	}
 	
 	@Override
 	public Object visit(AbsWhileStmt whileStmt, Stack<Frame> visArg) {
 		ImcExpr cond = (ImcExpr) whileStmt.cond.accept(this, visArg);
-		whileStmt.stmts.accept(this, visArg);
 		
-		ImcGen.stmtImCode.put(whileStmt, new ImcCJUMP(cond, new Label(), new Label()));
-		return ImcGen.stmtImCode.get(whileStmt);	
+		ImcSTMTS doStmts = (ImcSTMTS) whileStmt.stmts.accept(this, visArg);
+		
+		Vector<ImcStmt> stmts = new Vector<ImcStmt>();
+		
+		Label startLabel = new Label();
+		Label doLabel = new Label();
+		Label endLabel = new Label();
+
+		stmts.add(new ImcLABEL(startLabel));
+		stmts.add(new ImcCJUMP(cond, doLabel, endLabel));
+		stmts.add(new ImcLABEL(doLabel));
+		stmts.add(doStmts);
+		stmts.add(new ImcJUMP(startLabel));
+		stmts.add(new ImcLABEL(endLabel));
+		
+		ImcGen.stmtImCode.put(whileStmt, new ImcSTMTS(stmts));
+		return ImcGen.stmtImCode.get(whileStmt);
 	}
+	
+	@Override
+	public Object visit(AbsStmts stmts, Stack<Frame> visArg) {
+		Vector<ImcStmt> sequence = new Vector<ImcStmt>();
+		for(AbsStmt stmt: stmts.stmts()) {
+			sequence.add((ImcStmt)stmt.accept(this, visArg));
+		}
+		return new ImcSTMTS(sequence);	
+	}
+	
 }
