@@ -142,5 +142,11 @@ public class CodeGenerator extends AbsFullVisitor<Object, Stack<Frame>> {
 		return null;
 	}
 	
+	@Override
+	public Object visit(AbsArrExpr arrExpr, Stack<Frame> visArg) {
+		ImcGen.exprImCode.put(arrExpr, new ImcMEM(arrExpr.accept(getAddrGenerator(), visArg)));
+		return ImcGen.exprImCode.get(arrExpr);
+	}
+	
 	
 }

@@ -2,6 +2,7 @@ package compiler.phases.imcgen;
 
 import java.util.Stack;
 
+import compiler.data.abstree.AbsArrExpr;
 import compiler.data.abstree.AbsAtomExpr;
 import compiler.data.abstree.AbsVarDecl;
 import compiler.data.abstree.AbsVarName;
@@ -18,6 +19,7 @@ import compiler.data.layout.AbsAccess;
 import compiler.data.layout.Access;
 import compiler.data.layout.Frame;
 import compiler.data.layout.RelAccess;
+import compiler.data.type.SemArrType;
 import compiler.phases.frames.Frames;
 import compiler.phases.seman.SemAn;
 import compiler.phases.seman.TypeResolver;
@@ -41,6 +43,7 @@ public class AddrGenerator extends AbsFullVisitor<ImcExpr, Stack<Frame>>{
 	@Override
 	public ImcExpr visit(AbsVarName varName, Stack<Frame> visArg) {
 		Access access = Frames.accesses.get((AbsVarDecl)SemAn.declaredAt.get(varName));
+		
 		if(access instanceof AbsAccess) {
 			return new ImcNAME(((AbsAccess) access).label);
 		} else if( access instanceof RelAccess){
@@ -55,6 +58,15 @@ public class AddrGenerator extends AbsFullVisitor<ImcExpr, Stack<Frame>>{
 		}
 		
 		return super.visit(varName, visArg);
+	}
+	
+	@Override
+	public ImcExpr visit(AbsArrExpr arrExpr, Stack<Frame> visArg) {
+		ImcExpr expr1 = (ImcExpr) arrExpr.array.accept(codeGenerator, visArg);
+		ImcExpr expr2 = (ImcExpr) arrExpr.index.accept(codeGenerator, visArg);
+
+		long size = SemAn.ofType.get(arrExpr).size();
+		return new ImcBINOP(Oper.ADD, expr1, new ImcBINOP(Oper.MUL, expr2, new ImcCONST(size)));
 	}
 	
 }
