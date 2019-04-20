@@ -4,6 +4,7 @@ import java.util.Stack;
 
 import compiler.data.abstree.AbsArrExpr;
 import compiler.data.abstree.AbsAtomExpr;
+import compiler.data.abstree.AbsRecExpr;
 import compiler.data.abstree.AbsVarDecl;
 import compiler.data.abstree.AbsVarName;
 import compiler.data.abstree.AbsAtomExpr.Type;
@@ -68,5 +69,15 @@ public class AddrGenerator extends AbsFullVisitor<ImcExpr, Stack<Frame>>{
 		long size = SemAn.ofType.get(arrExpr).size();
 		return new ImcBINOP(Oper.ADD, expr1, new ImcBINOP(Oper.MUL, expr2, new ImcCONST(size)));
 	}
+	
+	@Override
+	public ImcExpr visit(AbsRecExpr recExpr, Stack<Frame> visArg) {
+		ImcExpr expr1 = recExpr.record.accept(this, visArg);
+		ImcExpr expr2 = recExpr.comp.accept(this, visArg);
+		
+		return new ImcBINOP(Oper.ADD, expr1, expr2);
+	}
+	
+	
 	
 }
