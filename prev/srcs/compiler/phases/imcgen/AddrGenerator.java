@@ -4,6 +4,8 @@ import java.util.Stack;
 
 import compiler.data.abstree.AbsArrExpr;
 import compiler.data.abstree.AbsAtomExpr;
+import compiler.data.abstree.AbsBlockExpr;
+import compiler.data.abstree.AbsCastExpr;
 import compiler.data.abstree.AbsRecExpr;
 import compiler.data.abstree.AbsVarDecl;
 import compiler.data.abstree.AbsVarName;
@@ -77,6 +79,7 @@ public class AddrGenerator extends AbsFullVisitor<ImcExpr, Stack<Frame>>{
 		
 		return new ImcBINOP(Oper.ADD, expr1, expr2);
 	}
+
 	
 	
 	

@@ -10,6 +10,7 @@ import java.util.Vector;
 import compiler.data.abstree.AbsArrExpr;
 import compiler.data.abstree.AbsAtomExpr;
 import compiler.data.abstree.AbsBinExpr;
+import compiler.data.abstree.AbsBlockExpr;
 import compiler.data.abstree.AbsDelExpr;
 import compiler.data.abstree.AbsExpr;
 import compiler.data.abstree.AbsFunDecl;
@@ -181,6 +182,18 @@ public class CodeGenerator extends AbsFullVisitor<Object, Stack<Frame>> {
 		
 		ImcGen.exprImCode.put(funName, new ImcCALL(l, imcArgs));
 		return ImcGen.exprImCode.get(funName);
+	}
+	
+	@Override
+	public ImcExpr visit(AbsBlockExpr blockExpr, Stack<Frame> visArg) {
+		// TODO: Maybe handle stmts??
+		blockExpr.stmts.accept(this, visArg);		
+		
+		ImcExpr expr = (ImcExpr) blockExpr.expr.accept(this, visArg);
+		
+
+		ImcGen.exprImCode.put(blockExpr, expr);
+		return ImcGen.exprImCode.get(blockExpr);
 	}
 	
 }
