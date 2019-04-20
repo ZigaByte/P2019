@@ -9,8 +9,10 @@ import java.util.Vector;
 
 import compiler.data.abstree.AbsArrExpr;
 import compiler.data.abstree.AbsAtomExpr;
+import compiler.data.abstree.AbsAtomType.Type;
 import compiler.data.abstree.AbsBinExpr;
 import compiler.data.abstree.AbsBlockExpr;
+import compiler.data.abstree.AbsCastExpr;
 import compiler.data.abstree.AbsDelExpr;
 import compiler.data.abstree.AbsExpr;
 import compiler.data.abstree.AbsFunDecl;
@@ -29,8 +31,11 @@ import compiler.data.imcode.ImcExpr;
 import compiler.data.imcode.ImcMEM;
 import compiler.data.imcode.ImcNAME;
 import compiler.data.imcode.ImcUNOP;
+import compiler.data.imcode.ImcBINOP.Oper;
 import compiler.data.layout.Frame;
 import compiler.data.layout.Label;
+import compiler.data.type.SemCharType;
+import compiler.data.type.SemType;
 import compiler.phases.frames.Frames;
 import compiler.phases.seman.SemAn;
 
@@ -196,4 +201,13 @@ public class CodeGenerator extends AbsFullVisitor<Object, Stack<Frame>> {
 		return ImcGen.exprImCode.get(blockExpr);
 	}
 	
+	@Override
+	public Object visit(AbsCastExpr castExpr, Stack<Frame> visArg) {
+		ImcExpr expr = (ImcExpr) castExpr.expr.accept(this, visArg);
+		if(SemAn.isType.get(castExpr.type).actualType() instanceof SemCharType) {
+			expr = new ImcBINOP(Oper.MOD, expr, new ImcCONST(256));
+		}
+		ImcGen.exprImCode.put(castExpr, expr);
+		return ImcGen.exprImCode.get(castExpr);
+	}
 }
