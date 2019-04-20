@@ -8,6 +8,7 @@ import java.util.Stack;
 import java.util.Vector;
 
 import compiler.data.abstree.AbsArrExpr;
+import compiler.data.abstree.AbsAssignStmt;
 import compiler.data.abstree.AbsAtomExpr;
 import compiler.data.abstree.AbsAtomType.Type;
 import compiler.data.abstree.AbsBinExpr;
@@ -15,6 +16,7 @@ import compiler.data.abstree.AbsBlockExpr;
 import compiler.data.abstree.AbsCastExpr;
 import compiler.data.abstree.AbsDelExpr;
 import compiler.data.abstree.AbsExpr;
+import compiler.data.abstree.AbsExprStmt;
 import compiler.data.abstree.AbsFunDecl;
 import compiler.data.abstree.AbsFunDef;
 import compiler.data.abstree.AbsFunName;
@@ -27,11 +29,15 @@ import compiler.data.abstree.visitor.AbsFullVisitor;
 import compiler.data.imcode.ImcBINOP;
 import compiler.data.imcode.ImcCALL;
 import compiler.data.imcode.ImcCONST;
+import compiler.data.imcode.ImcESTMT;
 import compiler.data.imcode.ImcExpr;
 import compiler.data.imcode.ImcMEM;
+import compiler.data.imcode.ImcMOVE;
 import compiler.data.imcode.ImcNAME;
+import compiler.data.imcode.ImcStmt;
 import compiler.data.imcode.ImcUNOP;
 import compiler.data.imcode.ImcBINOP.Oper;
+import compiler.data.imcode.visitor.ImcVisitor;
 import compiler.data.layout.Frame;
 import compiler.data.layout.Label;
 import compiler.data.type.SemCharType;
@@ -209,5 +215,20 @@ public class CodeGenerator extends AbsFullVisitor<Object, Stack<Frame>> {
 		}
 		ImcGen.exprImCode.put(castExpr, expr);
 		return ImcGen.exprImCode.get(castExpr);
+	}
+	
+	@Override
+	public Object visit(AbsExprStmt exprStmt, Stack<Frame> visArg) {
+		ImcGen.stmtImCode.put(exprStmt, new ImcESTMT((ImcExpr)exprStmt.expr.accept(this, visArg)));
+		return ImcGen.stmtImCode.get(exprStmt);
+	}
+	
+	@Override
+	public Object visit(AbsAssignStmt assignStmt, Stack<Frame> visArg) {
+		ImcExpr dst = (ImcExpr) assignStmt.dst.accept(this, visArg);
+		ImcExpr src = (ImcExpr) assignStmt.src.accept(this, visArg);
+		
+		ImcGen.stmtImCode.put(assignStmt, new ImcMOVE(dst, src));
+		return ImcGen.stmtImCode.get(assignStmt);
 	}
 }
