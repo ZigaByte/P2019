@@ -20,20 +20,26 @@ import compiler.data.abstree.AbsExprStmt;
 import compiler.data.abstree.AbsFunDecl;
 import compiler.data.abstree.AbsFunDef;
 import compiler.data.abstree.AbsFunName;
+import compiler.data.abstree.AbsIfStmt;
 import compiler.data.abstree.AbsNewExpr;
 import compiler.data.abstree.AbsRecExpr;
+import compiler.data.abstree.AbsStmt;
+import compiler.data.abstree.AbsStmts;
 import compiler.data.abstree.AbsUnExpr;
 import compiler.data.abstree.AbsVarDecl;
 import compiler.data.abstree.AbsVarName;
+import compiler.data.abstree.AbsWhileStmt;
 import compiler.data.abstree.visitor.AbsFullVisitor;
 import compiler.data.imcode.ImcBINOP;
 import compiler.data.imcode.ImcCALL;
+import compiler.data.imcode.ImcCJUMP;
 import compiler.data.imcode.ImcCONST;
 import compiler.data.imcode.ImcESTMT;
 import compiler.data.imcode.ImcExpr;
 import compiler.data.imcode.ImcMEM;
 import compiler.data.imcode.ImcMOVE;
 import compiler.data.imcode.ImcNAME;
+import compiler.data.imcode.ImcSTMTS;
 import compiler.data.imcode.ImcStmt;
 import compiler.data.imcode.ImcUNOP;
 import compiler.data.imcode.ImcBINOP.Oper;
@@ -230,5 +236,24 @@ public class CodeGenerator extends AbsFullVisitor<Object, Stack<Frame>> {
 		
 		ImcGen.stmtImCode.put(assignStmt, new ImcMOVE(dst, src));
 		return ImcGen.stmtImCode.get(assignStmt);
+	}
+	
+	@Override
+	public Object visit(AbsIfStmt ifStmt, Stack<Frame> visArg) {
+		ImcExpr cond = (ImcExpr) ifStmt.cond.accept(this, visArg);
+		ifStmt.thenStmts.accept(this, visArg);
+		ifStmt.elseStmts.accept(this, visArg);
+		// TODO labels
+		ImcGen.stmtImCode.put(ifStmt, new ImcCJUMP(cond, new Label(), new Label()));
+		return ImcGen.stmtImCode.get(ifStmt);	
+	}
+	
+	@Override
+	public Object visit(AbsWhileStmt whileStmt, Stack<Frame> visArg) {
+		ImcExpr cond = (ImcExpr) whileStmt.cond.accept(this, visArg);
+		whileStmt.stmts.accept(this, visArg);
+		
+		ImcGen.stmtImCode.put(whileStmt, new ImcCJUMP(cond, new Label(), new Label()));
+		return ImcGen.stmtImCode.get(whileStmt);	
 	}
 }
