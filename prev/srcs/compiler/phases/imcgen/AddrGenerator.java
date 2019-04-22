@@ -4,8 +4,6 @@ import java.util.Stack;
 
 import compiler.data.abstree.AbsArrExpr;
 import compiler.data.abstree.AbsAtomExpr;
-import compiler.data.abstree.AbsBlockExpr;
-import compiler.data.abstree.AbsCastExpr;
 import compiler.data.abstree.AbsRecExpr;
 import compiler.data.abstree.AbsVarDecl;
 import compiler.data.abstree.AbsVarName;
@@ -22,10 +20,8 @@ import compiler.data.layout.AbsAccess;
 import compiler.data.layout.Access;
 import compiler.data.layout.Frame;
 import compiler.data.layout.RelAccess;
-import compiler.data.type.SemArrType;
 import compiler.phases.frames.Frames;
 import compiler.phases.seman.SemAn;
-import compiler.phases.seman.TypeResolver;
 
 public class AddrGenerator extends AbsFullVisitor<ImcExpr, Stack<Frame>>{
 
@@ -75,7 +71,11 @@ public class AddrGenerator extends AbsFullVisitor<ImcExpr, Stack<Frame>>{
 	@Override
 	public ImcExpr visit(AbsRecExpr recExpr, Stack<Frame> visArg) {
 		ImcExpr expr1 = recExpr.record.accept(this, visArg);
-		ImcExpr expr2 = recExpr.comp.accept(this, visArg);
+		ImcExpr expr2 = recExpr.comp.accept(this, visArg); // but we only want offset
+		
+		if(expr2 instanceof ImcBINOP) {
+			return new ImcBINOP(Oper.ADD, expr1, ((ImcBINOP)expr2).sndExpr);
+		}
 		
 		return new ImcBINOP(Oper.ADD, expr1, expr2);
 	}

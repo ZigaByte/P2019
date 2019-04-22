@@ -10,7 +10,6 @@ import java.util.Vector;
 import compiler.data.abstree.AbsArrExpr;
 import compiler.data.abstree.AbsAssignStmt;
 import compiler.data.abstree.AbsAtomExpr;
-import compiler.data.abstree.AbsAtomType.Type;
 import compiler.data.abstree.AbsBinExpr;
 import compiler.data.abstree.AbsBlockExpr;
 import compiler.data.abstree.AbsCastExpr;
@@ -26,7 +25,6 @@ import compiler.data.abstree.AbsRecExpr;
 import compiler.data.abstree.AbsStmt;
 import compiler.data.abstree.AbsStmts;
 import compiler.data.abstree.AbsUnExpr;
-import compiler.data.abstree.AbsVarDecl;
 import compiler.data.abstree.AbsVarName;
 import compiler.data.abstree.AbsWhileStmt;
 import compiler.data.abstree.visitor.AbsFullVisitor;
@@ -45,11 +43,9 @@ import compiler.data.imcode.ImcSTMTS;
 import compiler.data.imcode.ImcStmt;
 import compiler.data.imcode.ImcUNOP;
 import compiler.data.imcode.ImcBINOP.Oper;
-import compiler.data.imcode.visitor.ImcVisitor;
 import compiler.data.layout.Frame;
 import compiler.data.layout.Label;
 import compiler.data.type.SemCharType;
-import compiler.data.type.SemType;
 import compiler.phases.frames.Frames;
 import compiler.phases.seman.SemAn;
 
@@ -161,7 +157,6 @@ public class CodeGenerator extends AbsFullVisitor<Object, Stack<Frame>> {
 	
 	@Override
 	public Object visit(AbsNewExpr newExpr, Stack<Frame> visArg) {
-		// TODO Auto-generated method stub
 		long size = SemAn.isType.get(newExpr.type).actualType().size();
 		
 		Vector<ImcExpr> args = new Vector<>();
@@ -213,7 +208,8 @@ public class CodeGenerator extends AbsFullVisitor<Object, Stack<Frame>> {
 	
 	@Override
 	public ImcExpr visit(AbsBlockExpr blockExpr, Stack<Frame> visArg) {
-		blockExpr.stmts.accept(this, visArg);		
+		blockExpr.stmts.accept(this, visArg);
+		blockExpr.decls.accept(this, visArg);
 		
 		ImcExpr expr = (ImcExpr) blockExpr.expr.accept(this, visArg);
 		
