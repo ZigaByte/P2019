@@ -801,11 +801,13 @@ public class SynAn extends Phase {
 		case DOT:
 			add(exprNode, Term.DOT, String.format("Expected symbol %s, but received %s.", Term.DOT, currSymb.token));
 			add(exprNode, Term.IDENTIFIER, String.format("Expected symbol %s, but received %s.", Term.IDENTIFIER, currSymb.token));
+			exprNode.add(parsePstfExprRest());
 			return exprNode;
 		case LBRACKET:
 			add(exprNode, Term.LBRACKET, String.format("Expected symbol %s, but received %s.", Term.LBRACKET, currSymb.token));
 			exprNode.add(parseExpr());
 			add(exprNode, Term.RBRACKET, String.format("Expected symbol %s, but received %s.", Term.RBRACKET, currSymb.token));
+			exprNode.add(parsePstfExprRest());
 			return exprNode;
 		default:
 			throw new Report.Error(currSymb, String.format("[parsePstfExprRest] ExprSymbol %s (%s) not expected.", currSymb, currSymb.token));

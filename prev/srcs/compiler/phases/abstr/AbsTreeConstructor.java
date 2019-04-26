@@ -373,11 +373,13 @@ public class AbsTreeConstructor implements DerVisitor<AbsTree, AbsTree> {
 			switch (((DerLeaf)node.subtree(0)).symb.token) {
 			case LBRACKET:
 				AbsExpr index = (AbsExpr) node.subtree(1).accept(this, null);
-				return new AbsArrExpr(new Location(node.subtree(0), index), (AbsExpr) visArg, index);
+				AbsArrExpr arrExpr = new AbsArrExpr(new Location(node.subtree(0), index), (AbsExpr) visArg, index);
+				return node.subtree(3).accept(this, arrExpr);
 			case DOT:
 				String name = ((DerLeaf)node.subtree(1)).symb.lexeme;
 				AbsVarName comp = new AbsVarName(new Location(node), name);
-				return new AbsRecExpr(new Location(visArg, comp), (AbsExpr) visArg, comp);
+				AbsRecExpr recExpr = new AbsRecExpr(new Location(visArg, comp), (AbsExpr) visArg, comp);
+				return node.subtree(2).accept(this, recExpr);
 			default:
 				break;
 			}
