@@ -131,6 +131,8 @@ public class FrmEvaluator extends AbsFullVisitor<Object, FrmEvaluator.Context> {
 	
 	@Override
 	public Object visit(AbsArgs args, Context visArg) {
+		super.visit(args, visArg); // Make sure to visitAnyway, there might be strings inside or something
+		
 		int size = 0;
 		for(AbsExpr expr: args.args()) {
 			SemType type = SemAn.ofType.get(expr);
