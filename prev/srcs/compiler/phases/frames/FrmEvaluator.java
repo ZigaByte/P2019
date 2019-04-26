@@ -72,6 +72,22 @@ public class FrmEvaluator extends AbsFullVisitor<Object, FrmEvaluator.Context> {
 	}
 	
 	@Override
+	public Object visit(AbsFunDecl funDecl, Context visArg) {
+		FunContext funContext = new FunContext();
+		funContext.depth = ((FunContext)visArg).depth + 1;
+		
+		super.visit(funDecl, funContext);
+		
+		Label label = funContext.depth == 1 ? new Label(funDecl.name) : new Label();
+		
+		funContext.argsSize += new SemPtrType(new SemVoidType()).size(); // Add the Static link
+		
+		Frame frame = new Frame(label, funContext.depth, funContext.locsSize, funContext.argsSize);
+		Frames.frames.put(funDecl, frame);
+		return null;
+	}
+	
+	@Override
 	public Object visit(AbsVarDecl varDecl, Context visArg) {
 		FunContext funContext = (FunContext)visArg;
 		
