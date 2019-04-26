@@ -70,8 +70,8 @@ public class AddrGenerator extends AbsFullVisitor<ImcExpr, Stack<Frame>>{
 	
 	@Override
 	public ImcExpr visit(AbsRecExpr recExpr, Stack<Frame> visArg) {
-		ImcExpr expr1 = recExpr.record.accept(this, visArg);
-		ImcExpr expr2 = recExpr.comp.accept(this, visArg); // but we only want offset
+		ImcExpr expr1 = (ImcExpr) recExpr.record.accept(codeGenerator, visArg);
+		ImcExpr expr2 = (ImcExpr) recExpr.comp.accept(codeGenerator, visArg); // but we only want offset
 		
 		if(expr2 instanceof ImcBINOP) {
 			return new ImcBINOP(Oper.ADD, expr1, ((ImcBINOP)expr2).sndExpr);
