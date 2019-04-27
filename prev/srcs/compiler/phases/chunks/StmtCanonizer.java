@@ -33,6 +33,19 @@ public class StmtCanonizer implements ImcVisitor<Vector<ImcStmt>, Object> {
 		return eStmt.expr.accept(this, null);
 	}
 	
+	@Override
+	public Vector<ImcStmt> visit(ImcLABEL label, Object visArg) {
+		Vector<ImcStmt> toReturn = new Vector<>();
+		toReturn.add(label);
+		return toReturn;	
+	}
+	
+	@Override
+	public Vector<ImcStmt> visit(ImcJUMP jump, Object visArg) {
+		Vector<ImcStmt> toReturn = new Vector<>();
+		toReturn.add(jump);
+		return toReturn;
+	}
 	
 	@Override
 	public Vector<ImcStmt> visit(ImcBINOP binOp, Object visArg) {
@@ -92,10 +105,7 @@ public class StmtCanonizer implements ImcVisitor<Vector<ImcStmt>, Object> {
 	@Override
 	public Vector<ImcStmt> visit(ImcSEXPR sExpr, Object visArg) {
 		Vector<ImcStmt> toReturn = new Vector<>();
-		toReturn.addAll(sExpr.stmt.accept(this, null));
-		
-		//toReturn.addAll(sExpr.expr.accept(this, null));
-		
+		toReturn.addAll(sExpr.stmt.accept(this, null));		
 		return toReturn;
 	}
 	
@@ -114,6 +124,20 @@ public class StmtCanonizer implements ImcVisitor<Vector<ImcStmt>, Object> {
 		
 		toReturn.add(new ImcESTMT(call));
 		 
+		return toReturn;
+	}
+	
+	@Override
+	public Vector<ImcStmt> visit(ImcCJUMP cjump, Object visArg) {
+		Vector<ImcStmt> toReturn = new Vector<>();		
+		ImcTEMP t1 = new ImcTEMP(new Temp());
+		toReturn.add(new ImcMOVE(t1, cjump.cond.accept(new ExprCanonizer(), cjump.cond.accept(this, null))));
+		
+		Label negLabel = new Label();
+		toReturn.add(new ImcCJUMP(t1, cjump.posLabel, negLabel));
+		toReturn.add(new ImcLABEL(negLabel));
+		toReturn.add(new ImcJUMP(cjump.negLabel));		
+		
 		return toReturn;
 	}
 	

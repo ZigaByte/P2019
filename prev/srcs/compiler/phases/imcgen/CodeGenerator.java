@@ -45,7 +45,6 @@ import compiler.data.imcode.ImcStmt;
 import compiler.data.imcode.ImcTEMP;
 import compiler.data.imcode.ImcUNOP;
 import compiler.data.imcode.ImcBINOP.Oper;
-import compiler.data.imcode.visitor.ImcVisitor;
 import compiler.data.layout.Frame;
 import compiler.data.layout.Label;
 import compiler.data.type.SemCharType;
