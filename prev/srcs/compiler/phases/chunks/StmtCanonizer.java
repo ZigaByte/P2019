@@ -40,6 +40,24 @@ public class StmtCanonizer implements ImcVisitor<Vector<ImcStmt>, Object> {
 		toReturn.addAll(sndStmts);
 		toReturn.add(new ImcMOVE(t2, sndExpr));
 		
+		// This gets poped by the ExprCanonizer, hopefully
+		toReturn.add(new ImcESTMT(new ImcBINOP(binOp.oper, t1, t2)));
+		
+		return toReturn;
+	}
+	
+	@Override
+	public Vector<ImcStmt> visit(ImcUNOP unOp, Object visArg) {
+		Vector<ImcStmt> subStmts = unOp.subExpr.accept(this, null);
+		ImcExpr subExpr = unOp.subExpr.accept(new ExprCanonizer(), subStmts);
+		
+		ImcTEMP t1 = new ImcTEMP(new Temp());
+		Vector<ImcStmt> toReturn = new Vector<>();
+		toReturn.addAll(subStmts);
+		toReturn.add(new ImcMOVE(t1, subExpr));
+		
+		toReturn.add(new ImcESTMT(new ImcUNOP(unOp.oper, t1)));
+		
 		return toReturn;
 	}
 	
