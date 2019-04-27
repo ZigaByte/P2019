@@ -36,10 +36,10 @@ public class ExprCanonizer implements ImcVisitor<ImcExpr, Vector<ImcStmt>> {
 	
 	@Override
 	public ImcExpr visit(ImcBINOP binOp, Vector<ImcStmt> visArg) {
-		return binOp;
-		//		ImcExpr toReturn = ((ImcESTMT)visArg.lastElement()).expr;
-//		visArg.removeElement(visArg.lastElement());
-//		return toReturn;
+		//return binOp;
+		ImcExpr toReturn = ((ImcESTMT)visArg.lastElement()).expr;
+		visArg.removeElement(visArg.lastElement());
+		return toReturn;
 	}
 	
 	@Override
