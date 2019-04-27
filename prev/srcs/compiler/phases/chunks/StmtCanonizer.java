@@ -25,6 +25,17 @@ public class StmtCanonizer implements ImcVisitor<Vector<ImcStmt>, Object> {
 	}
 	
 	@Override
+	public Vector<ImcStmt> visit(ImcNAME temp, Object visArg) {
+		return new Vector<ImcStmt>();
+	}
+	
+	@Override
+	public Vector<ImcStmt> visit(ImcESTMT eStmt, Object visArg) {
+		return eStmt.expr.accept(this, null);
+	}
+	
+	
+	@Override
 	public Vector<ImcStmt> visit(ImcBINOP binOp, Object visArg) {
 		Vector<ImcStmt> fstStmts = binOp.fstExpr.accept(this, null);
 		ImcExpr fstExpr = binOp.fstExpr.accept(new ExprCanonizer(), fstStmts);
@@ -52,6 +63,7 @@ public class StmtCanonizer implements ImcVisitor<Vector<ImcStmt>, Object> {
 		ImcExpr subExpr = unOp.subExpr.accept(new ExprCanonizer(), subStmts);
 		
 		ImcTEMP t1 = new ImcTEMP(new Temp());
+		
 		Vector<ImcStmt> toReturn = new Vector<>();
 		toReturn.addAll(subStmts);
 		toReturn.add(new ImcMOVE(t1, subExpr));
@@ -62,8 +74,43 @@ public class StmtCanonizer implements ImcVisitor<Vector<ImcStmt>, Object> {
 	}
 	
 	@Override
-	public Vector<ImcStmt> visit(ImcMOVE move, Object visArg) {
+	public Vector<ImcStmt> visit(ImcMEM mem, Object visArg) {
+		Vector<ImcStmt> addrStmts = mem.addr.accept(this, null);
+		ImcExpr addrExpr = mem.addr.accept(new ExprCanonizer(), addrStmts);
 		
+		ImcTEMP t1 = new ImcTEMP(new Temp());
+
+		Vector<ImcStmt> toReturn = new Vector<>();
+		toReturn.addAll(addrStmts);
+		toReturn.add(new ImcMOVE(t1, addrExpr));
+		
+		toReturn.add(new ImcESTMT(new ImcMEM(t1)));
+		
+		return toReturn;
+	}
+	
+	
+	@Override
+	public Vector<ImcStmt> visit(ImcSEXPR sExpr, Object visArg) {
+		Vector<ImcStmt> toReturn = new Vector<>();
+		toReturn.addAll(sExpr.stmt.accept(this, null));
+		
+		//toReturn.addAll(sExpr.expr.accept(this, null));
+		
+		return toReturn;
+	}
+	
+	@Override
+	public Vector<ImcStmt> visit(ImcSTMTS stmts, Object visArg) {
+		Vector<ImcStmt> toReturn = new Vector<>();
+		for(ImcStmt stmt : stmts.stmts()) {
+			toReturn.addAll(stmt.accept(this, null));
+		}
+		return toReturn;
+	}
+	
+	@Override
+	public Vector<ImcStmt> visit(ImcMOVE move, Object visArg) {
 		Vector<ImcStmt> dstStmts = move.dst.accept(this, null);
 		ImcExpr dstExpr = move.dst.accept(new ExprCanonizer(), dstStmts);
 		Vector<ImcStmt> srcStmts = move.src.accept(this, null);
