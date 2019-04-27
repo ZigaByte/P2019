@@ -39,10 +39,13 @@ import compiler.data.imcode.ImcLABEL;
 import compiler.data.imcode.ImcMEM;
 import compiler.data.imcode.ImcMOVE;
 import compiler.data.imcode.ImcNAME;
+import compiler.data.imcode.ImcSEXPR;
 import compiler.data.imcode.ImcSTMTS;
 import compiler.data.imcode.ImcStmt;
+import compiler.data.imcode.ImcTEMP;
 import compiler.data.imcode.ImcUNOP;
 import compiler.data.imcode.ImcBINOP.Oper;
+import compiler.data.imcode.visitor.ImcVisitor;
 import compiler.data.layout.Frame;
 import compiler.data.layout.Label;
 import compiler.data.type.SemCharType;
@@ -150,6 +153,9 @@ public class CodeGenerator extends AbsFullVisitor<Object, Stack<Frame>> {
 	@Override
 	public Object visit(AbsDelExpr delExpr, Stack<Frame> visArg) {
 		Vector<ImcExpr> args = new Vector<>();
+		
+		args.add(getStaticLink(visArg.peek().depth, 1, new ImcTEMP(visArg.peek().FP))); // sl
+		
 		args.add((ImcExpr)delExpr.expr.accept(this, visArg));
 		ImcGen.exprImCode.put(delExpr, new ImcCALL(new Label("del"), args));
 		return ImcGen.exprImCode.get(delExpr);
@@ -160,6 +166,9 @@ public class CodeGenerator extends AbsFullVisitor<Object, Stack<Frame>> {
 		long size = SemAn.isType.get(newExpr.type).actualType().size();
 		
 		Vector<ImcExpr> args = new Vector<>();
+		
+		args.add(getStaticLink(visArg.peek().depth, 1, new ImcTEMP(visArg.peek().FP))); // sl
+		
 		args.add(new ImcCONST(size));
 		
 		ImcGen.exprImCode.put(newExpr, new ImcCALL(new Label("new"), args));
@@ -193,19 +202,22 @@ public class CodeGenerator extends AbsFullVisitor<Object, Stack<Frame>> {
 		return ImcGen.exprImCode.get(recExpr);
 	}
 	
+	private ImcExpr getStaticLink(int callerDepth, int calledDepth, ImcTEMP fp) {
+		ImcExpr staticLink = fp;
+		for(int i = 0; callerDepth >= calledDepth + i; i++) {
+			staticLink = new ImcMEM(staticLink);
+		}
+		return staticLink;
+	}	
 	
 	@Override
 	public Object visit(AbsFunName funName, Stack<Frame> visArg) {
 		Vector<ImcExpr> imcArgs = new Vector<>();
 		
-		Frame calleeFrame = visArg.peek();
+		Frame callerFrame = visArg.peek();
 		Frame calledFrame = Frames.frames.get((AbsFunDecl)SemAn.declaredAt.get(funName));
 		
-		ImcExpr staticLink = new ImcTEMP(calleeFrame.FP);
-		for(int i = 0; calleeFrame.depth >= calledFrame.depth + i; i++) {
-			staticLink = new ImcMEM(staticLink);
-		}
-		imcArgs.add(staticLink);
+		imcArgs.add(getStaticLink(callerFrame.depth, calledFrame.depth, new ImcTEMP(callerFrame.FP)));
 		
 		for(AbsExpr arg: funName.args.args()) {
 			imcArgs.add((ImcExpr) arg.accept(this, visArg));
