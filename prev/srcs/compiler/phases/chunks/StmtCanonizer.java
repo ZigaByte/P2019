@@ -122,7 +122,16 @@ public class StmtCanonizer implements ImcVisitor<Vector<ImcStmt>, Object> {
 	public Vector<ImcStmt> visit(ImcCALL call, Object visArg) {
 		Vector<ImcStmt> toReturn = new Vector<>();
 		
-		toReturn.add(new ImcESTMT(call));
+		Vector<ImcExpr> newArgs = new Vector<ImcExpr>();
+		for(ImcExpr arg: call.args()) {
+			ImcExpr newTemp = new ImcTEMP(new Temp());
+			newArgs.add(newTemp);
+			
+			toReturn.addAll(arg.accept(this, null));
+			toReturn.add(new ImcMOVE(newTemp, arg.accept(new ExprCanonizer(), toReturn)));
+		}
+		
+		toReturn.add(new ImcESTMT(new ImcCALL(call.label, newArgs)));
 		 
 		return toReturn;
 	}
