@@ -12,7 +12,20 @@ import compiler.data.imcode.visitor.*;
  * @author sliva
  */
 public class ExprCanonizer implements ImcVisitor<ImcExpr, Vector<ImcStmt>> {
-
-    // TODO
-
+		
+	@Override
+	public ImcExpr visit(ImcCONST constant, Vector<ImcStmt> visArg) {
+		return constant;
+	}
+	
+	@Override
+	public ImcExpr visit(ImcTEMP temp, Vector<ImcStmt> visArg) {
+		return temp;
+	}
+	
+	@Override
+	public ImcExpr visit(ImcBINOP binOp, Vector<ImcStmt> visArg) {
+		
+		return binOp;
+	}
 }
