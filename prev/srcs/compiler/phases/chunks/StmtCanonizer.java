@@ -4,7 +4,6 @@
 package compiler.phases.chunks;
 
 import java.util.*;
-import compiler.common.report.*;
 import compiler.data.layout.*;
 import compiler.data.imcode.*;
 import compiler.data.imcode.visitor.*;
@@ -106,6 +105,15 @@ public class StmtCanonizer implements ImcVisitor<Vector<ImcStmt>, Object> {
 		for(ImcStmt stmt : stmts.stmts()) {
 			toReturn.addAll(stmt.accept(this, null));
 		}
+		return toReturn;
+	}
+	
+	@Override
+	public Vector<ImcStmt> visit(ImcCALL call, Object visArg) {
+		Vector<ImcStmt> toReturn = new Vector<>();
+		
+		toReturn.add(new ImcESTMT(call));
+		 
 		return toReturn;
 	}
 	

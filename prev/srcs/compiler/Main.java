@@ -188,8 +188,11 @@ public class Main {
 			} while (false);
 
 			Report.info("Done.");
+			
+			// Run interpreter
+			Interpreter interpreter = new Interpreter(Chunks.dataChunks, Chunks.codeChunks);
+			interpreter.run("_main");
 		} catch (Report.Error __) {
 		}
 	}
-
 }
