@@ -203,6 +203,10 @@ public class CodeGenerator extends AbsFullVisitor<Object, Stack<Frame>> {
 	}
 	
 	private ImcExpr getStaticLink(int callerDepth, int calledDepth, ImcTEMP fp) {
+		if(calledDepth == 1) {
+			return new ImcCONST(0);
+		}
+		
 		ImcExpr staticLink = fp;
 		for(int i = 0; callerDepth >= calledDepth + i; i++) {
 			staticLink = new ImcMEM(staticLink);
