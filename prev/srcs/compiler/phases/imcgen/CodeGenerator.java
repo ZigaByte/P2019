@@ -208,12 +208,12 @@ public class CodeGenerator extends AbsFullVisitor<Object, Stack<Frame>> {
 	
 	@Override
 	public ImcExpr visit(AbsBlockExpr blockExpr, Stack<Frame> visArg) {
-		blockExpr.stmts.accept(this, visArg);
+		ImcSTMTS stmts = (ImcSTMTS) blockExpr.stmts.accept(this, visArg);
 		blockExpr.decls.accept(this, visArg);
 		
 		ImcExpr expr = (ImcExpr) blockExpr.expr.accept(this, visArg);
 		
-		ImcGen.exprImCode.put(blockExpr, expr);
+		ImcGen.exprImCode.put(blockExpr, new ImcSEXPR(stmts, expr));
 		return ImcGen.exprImCode.get(blockExpr);
 	}
 	
