@@ -138,9 +138,13 @@ public class StmtCanonizer implements ImcVisitor<Vector<ImcStmt>, Object> {
 	
 	@Override
 	public Vector<ImcStmt> visit(ImcCJUMP cjump, Object visArg) {
-		Vector<ImcStmt> toReturn = new Vector<>();		
+		Vector<ImcStmt> toReturn = new Vector<>();
+		
+		Vector<ImcStmt> condStmts = cjump.cond.accept(this, null);
+		
 		ImcTEMP t1 = new ImcTEMP(new Temp());
-		toReturn.add(new ImcMOVE(t1, cjump.cond.accept(new ExprCanonizer(), cjump.cond.accept(this, null))));
+		toReturn.addAll(condStmts);
+		toReturn.add(new ImcMOVE(t1, cjump.cond.accept(new ExprCanonizer(), condStmts)));
 		
 		Label negLabel = new Label();
 		toReturn.add(new ImcCJUMP(t1, cjump.posLabel, negLabel));
