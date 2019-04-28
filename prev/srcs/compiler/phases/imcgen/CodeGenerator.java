@@ -109,8 +109,9 @@ public class CodeGenerator extends AbsFullVisitor<Object, Stack<Frame>> {
 			break;
 			
 		case ADDR: // $
-			ImcGen.exprImCode.put(unExpr, (ImcExpr) unExpr.subExpr.accept(getAddrGenerator(), visArg));
-			return subExpr;
+			ImcExpr addrExpr = (ImcExpr) unExpr.subExpr.accept(getAddrGenerator(), visArg);
+			ImcGen.exprImCode.put(unExpr, addrExpr);
+			return addrExpr;
 			
 		default:
 			// Nothing to do really with other prefixes
