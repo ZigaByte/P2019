@@ -63,6 +63,8 @@ public class AddrGenerator extends AbsFullVisitor<ImcExpr, Stack<Frame>>{
 	public ImcExpr visit(AbsArrExpr arrExpr, Stack<Frame> visArg) {
 		ImcExpr expr1 = (ImcExpr) arrExpr.array.accept(codeGenerator, visArg);
 		ImcExpr expr2 = (ImcExpr) arrExpr.index.accept(codeGenerator, visArg);
+		
+		expr1 = ((ImcMEM)expr1).addr;
 
 		long size = SemAn.ofType.get(arrExpr).size();
 		return new ImcBINOP(Oper.ADD, expr1, new ImcBINOP(Oper.MUL, expr2, new ImcCONST(size)));
