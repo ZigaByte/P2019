@@ -61,4 +61,12 @@ public class ChunkGenerator extends AbsFullVisitor<Object, Object> {
 		}
 		return super.visit(atomExpr, visArg);
 	}
+	
+	@Override
+	public Object visit(AbsVarDecl varDecl, Object visArg) {
+		if(Frames.accesses.get(varDecl) instanceof AbsAccess) {
+			Chunks.dataChunks.add(new DataChunk((AbsAccess)Frames.accesses.get(varDecl)));
+		}
+		return super.visit(varDecl, visArg);
+	}
 }
