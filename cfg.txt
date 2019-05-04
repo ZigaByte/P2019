@@ -79,8 +79,8 @@ PrefExpr -> del ( expr ) .
 PrefExpr -> PstfExpr .
 
 PstfExpr -> CastExpr PstfExpr' .
-PstfExpr' -> [ expr ] .
-PstfExpr' -> DOT identifier .
+PstfExpr' -> [ expr ] PstfExpr' .
+PstfExpr' -> DOT identifier PstfExpr' .
 PstfExpr' -> .
 
 CastExpr -> ( expr expr_cast .
