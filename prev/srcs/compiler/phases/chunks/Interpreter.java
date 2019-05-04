@@ -389,6 +389,8 @@ public class Interpreter {
 			// Store registers and FP.
 			storedTemps = temps;
 			temps = new HashMap<Temp, Long>(temps);
+			//storedFP = FP;
+			//storedRV = RV;
 			// Store RA.
 			// Create a stack frame.
 			FP = frame.FP;
