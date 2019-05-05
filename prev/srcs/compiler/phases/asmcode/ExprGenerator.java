@@ -93,6 +93,28 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 	}
 	
 	@Override
+	public Temp visit(ImcUNOP unOp, Vector<AsmInstr> visArg) {
+		Vector<Temp> defs = new Vector<>();
+		Vector<Temp> uses = new Vector<>();
+		
+		Temp temp = new Temp();
+		defs.add(temp);
+		
+		uses.add(unOp.subExpr.accept(this, visArg));
+		
+		switch (unOp.oper) {
+		case NEG:
+			visArg.add(new AsmOPER("NEG `d0, `s0", uses, defs, null));
+			break;
+		case NOT:
+			visArg.add(new AsmOPER("SUB `d0, `s0, 1", uses, defs, null));
+			visArg.add(new AsmOPER("NEG `d0, `s0", defs, defs, null));
+			return temp;
+		}
+		return temp;
+	}
+	
+	@Override
 	public Temp visit(ImcNAME name, Vector<AsmInstr> visArg) {
 		Vector<Temp> uses = new Vector<>();
 		uses.add(new Temp());
@@ -122,4 +144,5 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		
 		return temp;
 	}
+	
 }
