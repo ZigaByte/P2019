@@ -5,3 +5,4 @@ xsltproc.exe --output output/seman.html ../prev/data/seman.xsl ../tests/test.sem
 xsltproc.exe --output output/frames.html ../prev/data/frames.xsl ../tests/test.frames.xml
 xsltproc.exe --output output/imcgen.html ../prev/data/imcgen.xsl ../tests/test.imcgen.xml
 xsltproc.exe --output output/chunks.html ../prev/data/chunks.xsl ../tests/test.chunks.xml
+xsltproc.exe --output output/asmgen.html ../prev/data/asmgen.xsl ../tests/test.asmgen.xml
