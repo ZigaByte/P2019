@@ -51,7 +51,15 @@ public class StmtGenerator implements ImcVisitor<Vector<AsmInstr>, Object> {
 	}
 	
 	public Vector<AsmInstr> visit(ImcJUMP jump, Object visArg) {
-		return new Vector<AsmInstr>();
+		Vector<AsmInstr> toReturn = new Vector<AsmInstr>();
+
+		Vector<Temp> defs = new Vector<>();
+		defs.add(new Temp());
+		
+		toReturn.add(new AsmOPER("GETA `d0, " + jump.label.name, null, defs, null));
+		toReturn.add(new AsmOPER("JMP `s0", defs,  null, null));
+
+		return toReturn;
 	}
 	
 }
