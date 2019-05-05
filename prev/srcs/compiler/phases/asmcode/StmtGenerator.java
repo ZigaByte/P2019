@@ -32,11 +32,11 @@ public class StmtGenerator implements ImcVisitor<Vector<AsmInstr>, Object> {
 		ImcExpr leftExpr = move.dst;
 		if(leftExpr instanceof ImcMEM) {
 			ImcMEM memExpr = (ImcMEM) move.dst;
-			
-			// Resolve address
-			uses.add(memExpr.addr.accept(new ExprGenerator(), toReturn));
+
 			// Resolve content
 			uses.add(move.src.accept(new ExprGenerator(), toReturn));
+			// Resolve address
+			uses.add(memExpr.addr.accept(new ExprGenerator(), toReturn));
 			
 			toReturn.add(new AsmOPER("STO `s0, `s1, 0", uses, null, null));	
 		} else {

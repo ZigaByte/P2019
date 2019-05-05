@@ -16,18 +16,16 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 
 	@Override
 	public Temp visit(ImcCONST constant, Vector<AsmInstr> visArg) {
-		Vector<Temp> uses = new Vector<>();
 		Vector<Temp> defs = new Vector<>();
-		Vector<Label> jumps = new Vector<>();
 		
 		Temp temp = new Temp();
 		defs.add(temp);
 		
 		// TODO Transform constant into binary
-		visArg.add(new AsmOPER("SETL `d0, x="+constant.value, uses, defs, jumps));
-		visArg.add(new AsmOPER("INCML `d0, x="+constant.value, uses, defs, jumps));
-		visArg.add(new AsmOPER("INCMH `d0, x="+constant.value, uses, defs, jumps));
-		visArg.add(new AsmOPER("INCH `d0, x="+constant.value, uses, defs, jumps));
+		visArg.add(new AsmOPER("SETL `d0, x="+constant.value, null, defs, null));
+		visArg.add(new AsmOPER("INCML `d0, x="+constant.value, null, defs, null));
+		visArg.add(new AsmOPER("INCMH `d0, x="+constant.value, null, defs, null));
+		visArg.add(new AsmOPER("INCH `d0, x="+constant.value, null, defs, null));
 
 		return temp;
 	}
@@ -48,7 +46,6 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 
 		Vector<Temp> defs = new Vector<>();
 		Vector<Temp> uses = new Vector<>();
-		Vector<Label> jumps = new Vector<>();
 		
 		Temp temp = new Temp();
 		defs.add(temp);
@@ -56,21 +53,38 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		uses.add(binOp.fstExpr.accept(this, visArg));
 		uses.add(binOp.sndExpr.accept(this, visArg));
 		
-		visArg.add(new AsmOPER(instr + " `d0, `s0, `s1", uses, defs, jumps));
+		visArg.add(new AsmOPER(instr + " `d0, `s0, `s1", uses, defs, null));
 		
 		return temp;
 	}
 	
 	@Override
 	public Temp visit(ImcNAME name, Vector<AsmInstr> visArg) {
-		Vector<Temp> defs = new Vector<>();
 		Vector<Temp> uses = new Vector<>();
-		Vector<Label> jumps = new Vector<>();
+		uses.add(new Temp());
 		
+		Vector<Temp> defs = new Vector<>();
 		Temp temp = new Temp();
 		defs.add(temp);
-				
-		visArg.add(new AsmOPER("SET `d0, " + name.label.name, uses, defs, jumps));
+		
+		visArg.add(new AsmOPER("GET `d0, " + name.label.name, null, uses, null));
+		
+		visArg.add(new AsmOPER("LDO `d0, `s0, 0", uses, defs, null));
+		
+		return temp;
+	}
+	
+	@Override
+	public Temp visit(ImcMEM mem, Vector<AsmInstr> visArg) {
+
+		Vector<Temp> defs = new Vector<>();
+		Vector<Temp> uses = new Vector<>();
+
+		Temp temp = new Temp();
+		defs.add(temp);		
+		uses.add(mem.addr.accept(this, visArg));
+
+		visArg.add(new AsmOPER("LDO `d0, `s0, 0", uses, defs, null));
 		
 		return temp;
 	}
