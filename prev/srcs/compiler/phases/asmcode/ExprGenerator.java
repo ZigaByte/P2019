@@ -37,13 +37,6 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 	
 	@Override
 	public Temp visit(ImcBINOP binOp, Vector<AsmInstr> visArg) {
-		String instr = "";
-		switch (binOp.oper) {
-		case ADD:
-			instr = "ADD";
-			break;
-		}
-
 		Vector<Temp> defs = new Vector<>();
 		Vector<Temp> uses = new Vector<>();
 		
@@ -52,6 +45,47 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		
 		uses.add(binOp.fstExpr.accept(this, visArg));
 		uses.add(binOp.sndExpr.accept(this, visArg));
+		
+		
+		String instr = "";
+		switch (binOp.oper) {
+		case ADD:
+			instr = "ADD";
+			break;
+		case SUB:
+			instr = "SUB";
+			break;
+		case MUL:
+			instr = "MUL";
+			break;
+		case DIV:
+			instr = "DIV";
+			break;
+			
+		case AND:
+			instr = "AND";
+			break;
+		case IOR:
+			instr = "IOR";
+			break;
+		case XOR:
+			instr = "XOR";
+			break;
+			
+		case EQU:
+		case GTH:
+		case LTH:
+		case LEQ:
+		case GEQ:
+		case NEQ:
+			// TODO Compares
+			instr = "COMPARISSON";
+			break;
+		case MOD:
+			// TODO Mod
+			instr = "MOD";
+			break;
+		}
 		
 		visArg.add(new AsmOPER(instr + " `d0, `s0, `s1", uses, defs, null));
 		
