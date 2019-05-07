@@ -82,14 +82,35 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 			break;
 			
 		case EQU:
+			visArg.add(new AsmOPER("CMP `d0,`s0,`s1", uses, defs, null));
+			visArg.add(new AsmOPER("ADD `d0,`s0,1", defs, defs, null));
+			visArg.add(new AsmOPER("DIV `d0,`s0,2", defs, defs, null));
+			visArg.add(new AsmOPER("GET `d0,rR", null, defs, null));
+			return temp;
+		case LTH:{
+			Temp inst = uses.get(0);
+			uses.removeElementAt(0);
+			uses.insertElementAt(inst, 1);}
 		case GTH:
-		case LTH:
-		case LEQ:
+			visArg.add(new AsmOPER("CMP `d0,`s0,`s1", uses, defs, null));
+			visArg.add(new AsmOPER("ADD `d0,`s0,1", defs, defs, null));
+			visArg.add(new AsmOPER("SR `d0,`s0,1", defs, defs, null));
+			return temp;
+		case LEQ:{
+			Temp inst = uses.get(0);
+			uses.removeElementAt(0);
+			uses.insertElementAt(inst, 1);}
 		case GEQ:
+			visArg.add(new AsmOPER("CMP `d0,`s0,`s1", uses, defs, null));
+			visArg.add(new AsmOPER("ADD `d0,`s0,2", defs, defs, null));
+			visArg.add(new AsmOPER("AND `d0,`s0,2", defs, defs, null));
+			visArg.add(new AsmOPER("SR `d0,`s0,1", defs, defs, null));
+			return temp;
 		case NEQ:
-			// TODO Compares
-			instr = "COMPARISSON";
-			break;
+			visArg.add(new AsmOPER("CMP `d0,`s0,`s1", uses, defs, null));
+			visArg.add(new AsmOPER("ADD `d0,`s0,2", defs, defs, null));
+			visArg.add(new AsmOPER("AND `d0,`s0,1", defs, defs, null));
+			return temp;
 		case MOD:
 			visArg.add(new AsmOPER("DIV `d0,`s0,`s1", uses, defs, null));
 			visArg.add(new AsmOPER("GET `d0,rR", null, defs, null));
