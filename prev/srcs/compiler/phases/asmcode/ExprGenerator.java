@@ -21,11 +21,20 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		Temp temp = new Temp();
 		defs.add(temp);
 		
-		// TODO Transform constant into binary
-		visArg.add(new AsmOPER("SETL `d0, x="+constant.value, null, defs, null));
-		visArg.add(new AsmOPER("INCML `d0, x="+constant.value, null, defs, null));
-		visArg.add(new AsmOPER("INCMH `d0, x="+constant.value, null, defs, null));
-		visArg.add(new AsmOPER("INCH `d0, x="+constant.value, null, defs, null));
+		long value = constant.value;
+		long l = value & ((1<<16) - 1);
+		value >>= 16;
+		long ml = value & ((1<<16) - 1);
+		value >>= 16;
+		long mh = value & ((1<<16) - 1);
+		value >>= 16;
+		long h = value & ((1<<16) - 1);
+		value >>= 16;
+		
+		visArg.add(new AsmOPER("SETL `d0, " + l, null, defs, null));
+		visArg.add(new AsmOPER("INCML `d0, " + ml, null, defs, null));
+		visArg.add(new AsmOPER("INCMH `d0, " + mh, null, defs, null));
+		visArg.add(new AsmOPER("INCH `d0, " + h, null, defs, null));
 
 		return temp;
 	}
