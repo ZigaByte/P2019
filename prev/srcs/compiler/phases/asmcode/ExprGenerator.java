@@ -31,10 +31,10 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		long h = value & ((1<<16) - 1);
 		value >>= 16;
 		
-		visArg.add(new AsmOPER("SETL `d0, " + l, null, defs, null));
-		visArg.add(new AsmOPER("INCML `d0, " + ml, null, defs, null));
-		visArg.add(new AsmOPER("INCMH `d0, " + mh, null, defs, null));
-		visArg.add(new AsmOPER("INCH `d0, " + h, null, defs, null));
+		visArg.add(new AsmOPER("SETL `d0," + l, null, defs, null));
+		visArg.add(new AsmOPER("INCML `d0," + ml, null, defs, null));
+		visArg.add(new AsmOPER("INCMH `d0," + mh, null, defs, null));
+		visArg.add(new AsmOPER("INCH `d0," + h, null, defs, null));
 
 		return temp;
 	}
@@ -91,9 +91,9 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 			instr = "COMPARISSON";
 			break;
 		case MOD:
-			// TODO Mod
-			instr = "MOD";
-			break;
+			visArg.add(new AsmOPER("DIV `d0,`s0,`s1", uses, defs, null));
+			visArg.add(new AsmOPER("GET `d0,rR", null, defs, null));
+			return temp;
 		}
 		
 		visArg.add(new AsmOPER(instr + " `d0, `s0, `s1", uses, defs, null));
@@ -113,11 +113,11 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		
 		switch (unOp.oper) {
 		case NEG:
-			visArg.add(new AsmOPER("NEG `d0, `s0", uses, defs, null));
+			visArg.add(new AsmOPER("NEG `d0,`s0", uses, defs, null));
 			break;
 		case NOT:
-			visArg.add(new AsmOPER("SUB `d0, `s0, 1", uses, defs, null));
-			visArg.add(new AsmOPER("NEG `d0, `s0", defs, defs, null));
+			visArg.add(new AsmOPER("SUB `d0,`s0,1", uses, defs, null));
+			visArg.add(new AsmOPER("NEG `d0,`s0", defs, defs, null));
 			return temp;
 		}
 		return temp;
@@ -132,9 +132,9 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		Temp temp = new Temp();
 		defs.add(temp);
 		
-		visArg.add(new AsmOPER("GET `d0, " + name.label.name, null, uses, null));
+		visArg.add(new AsmOPER("GET `d0," + name.label.name, null, uses, null));
 		
-		visArg.add(new AsmOPER("LDO `d0, `s0, 0", uses, defs, null));
+		visArg.add(new AsmOPER("LDO `d0,`s0,0", uses, defs, null));
 		
 		return temp;
 	}
@@ -149,7 +149,7 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		defs.add(temp);		
 		uses.add(mem.addr.accept(this, visArg));
 
-		visArg.add(new AsmOPER("LDO `d0, `s0, 0", uses, defs, null));
+		visArg.add(new AsmOPER("LDO `d0,`s0,0", uses, defs, null));
 		
 		return temp;
 	}
