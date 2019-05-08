@@ -18,34 +18,19 @@ import compiler.phases.imcgen.*;
  *
  */
 public class ChunkGenerator extends AbsFullVisitor<Object, Object> {
-
-	private ExprCanonizer exprCanonizer;
-	private StmtCanonizer stmtCanonizer;
-	
-	private ExprCanonizer exprCanonizer() {
-		if (exprCanonizer == null)
-			exprCanonizer = new ExprCanonizer();
-		return exprCanonizer;
-	}
-	private StmtCanonizer stmtCanonizer() {
-		if (stmtCanonizer == null)
-			stmtCanonizer = new StmtCanonizer();
-		return stmtCanonizer;
-	}
 	
 	@Override
-	public Object visit(AbsFunDef funDef, Object visArg) {
+	public Object visit(AbsFunDef funDef, Object visArg) {		
 		Frame funFrame = Frames.frames.get(funDef);
 		
 		ImcExpr bodyExpr = ImcGen.exprImCode.get(funDef.value);
-		ImcStmt funStmt = new ImcMOVE(new ImcTEMP(funFrame.RV), bodyExpr);
-		
+
 		Label entryLabel = new Label(funDef.name);
 		Label exitLabel = new Label();
 		
 		Vector<ImcStmt> funStmts = new Vector<>();
 		funStmts.add(new ImcLABEL(entryLabel));
-		funStmts.addAll(funStmt.accept(stmtCanonizer(), null));
+		funStmts.addAll(bodyExpr.accept(new StmtCanonizer(), funFrame.RV));
 		funStmts.add(new ImcJUMP(exitLabel));
 				
 		Chunks.codeChunks.add(new CodeChunk(funFrame, funStmts, entryLabel, exitLabel));

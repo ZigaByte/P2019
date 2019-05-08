@@ -105,7 +105,22 @@ public class StmtCanonizer implements ImcVisitor<Vector<ImcStmt>, Object> {
 	@Override
 	public Vector<ImcStmt> visit(ImcSEXPR sExpr, Object visArg) {
 		Vector<ImcStmt> toReturn = new Vector<>();
-		toReturn.addAll(sExpr.stmt.accept(this, null));		
+		toReturn.addAll(sExpr.stmt.accept(this, null));	
+		
+		Vector<ImcStmt> returnedFromExpr = sExpr.expr.accept(this, null);
+		if(returnedFromExpr.size() == 0) {
+			toReturn.add(new ImcESTMT(sExpr.expr.accept(new ExprCanonizer(), null)));
+		}else {
+			toReturn.addAll(returnedFromExpr);	
+		}
+		ImcESTMT last = (ImcESTMT) toReturn.lastElement();
+		toReturn.removeElement(last);
+		
+		if(visArg instanceof Temp) {
+			toReturn.add(new ImcMOVE(new ImcTEMP((Temp)visArg), last.expr));
+		}else {
+			toReturn.add(new ImcMOVE(new ImcTEMP(new Temp()), last.expr));	
+		}
 		return toReturn;
 	}
 	
