@@ -201,8 +201,8 @@ public class Main {
 			Report.info("Done.");
 			
 			// Run interpreter
-			Interpreter interpreter = new Interpreter(Chunks.dataChunks, Chunks.codeChunks);
-			interpreter.run("_main");
+			//Interpreter interpreter = new Interpreter(Chunks.dataChunks, Chunks.codeChunks);
+			//interpreter.run("_main");
 		} catch (Report.Error __) {
 		}
 	}
