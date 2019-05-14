@@ -18,28 +18,23 @@ public class LiveAn extends Phase {
 		super("livean");
 	}
 
+	private HashMap<Label, AsmInstr> labels = new HashMap<>();
+	
 	public void chunkLiveness(Code code) {
 		boolean changed = true;
 		while(changed) {
 			changed = false;
-			for (int i = 0; i < code.instrs.size(); i++) {
+			for (int i = code.instrs.size() - 1; i >= 0 ; i--) {
 				AsmInstr inst = code.instrs.get(i);
 				{ // IN
-					HashSet<Temp> toAdd = new HashSet<>();
-					toAdd.addAll(inst.uses());
+					HashSet<Temp> newIn = new HashSet<>();
+					newIn.addAll(inst.uses());
+					newIn.addAll(inst.out());
+					newIn.removeAll(inst.defs());
 					
-					HashSet<Temp> outs = new HashSet<>();
-					outs.addAll(inst.out());
-					outs.removeAll(inst.defs());
-					
-					toAdd.addAll(outs);
-					
-					/// Just get the new ones
-					toAdd.removeAll(inst.in());
-					
-					if(toAdd.size() > 0) {
+					if (!newIn.equals(inst.in())){
 						changed = true;
-						inst.addInTemps(toAdd);		
+						inst.addInTemps(newIn);
 					}
 				}
 				
@@ -51,15 +46,21 @@ public class LiveAn extends Phase {
 						toAdd.addAll(code.instrs.get(i+1).in());
 					}
 					
-					// Add all jumps
 					for(Label l : inst.jumps()) {
 						// Find the instruction we can jump to.
 						AsmInstr succ = null;
-						for (AsmInstr instruction: code.instrs) {
-							if(instruction instanceof AsmLABEL && ((AsmLABEL)instruction).getLabel().equals(l)) {
-								succ = instruction;
+						if(labels.containsKey(l)) {
+							succ = labels.get(l);
+						}else {
+							for (AsmInstr instruction: code.instrs) {
+								if(instruction instanceof AsmLABEL && ((AsmLABEL)instruction).getLabel().equals(l)) {
+									succ = instruction;
+									labels.put(l, succ);
+									break;
+								}
 							}
 						}
+						
 						if(succ != null) {
 							toAdd.addAll(succ.in());
 						}
