@@ -1,0 +1,12 @@
+fun main():int={
+	test();
+
+	:0
+	where 
+		var x:int;
+		
+		fun test():void={
+			x = 1;
+			:none
+		};
+};
