@@ -181,16 +181,25 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		jumps.add(call.label);
 		
 		int offset = call.args().size() * 8;
+		int i = 0;
+		
+		Temp result = null;
+		
 		for(ImcExpr expr: call.args()) {
 			offset -= 8;
 			
+			Temp temp = expr.accept(this, visArg);
+			if(i == 0) {
+				result = temp;
+			}
+			
 			Vector<Temp> uses = new Vector<>();
-			uses.add(expr.accept(this, visArg));
+			uses.add(temp);
 			visArg.add(new AsmOPER("STO `s0,$254,"+offset , uses, null, null));
 		}
 		
 		visArg.add(new AsmOPER("PUSHJ $15," + call.label.name, null, null, jumps));
-		return new Temp();
+		return result;
 	}
 	
 }
