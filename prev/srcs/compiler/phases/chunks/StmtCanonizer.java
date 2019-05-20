@@ -15,7 +15,13 @@ public class StmtCanonizer implements ImcVisitor<Vector<ImcStmt>, Object> {
 	
 	@Override
 	public Vector<ImcStmt> visit(ImcCONST constant, Object visArg) {
-		return new Vector<ImcStmt>();
+		Vector<ImcStmt> toReturn = new Vector<>();
+		
+		if(visArg instanceof Temp) {
+			toReturn.add(new ImcMOVE(new ImcTEMP((Temp)visArg), constant.accept(new ExprCanonizer(), null)));
+		}
+		
+		return toReturn;
 	}
 	
 	@Override
@@ -94,9 +100,13 @@ public class StmtCanonizer implements ImcVisitor<Vector<ImcStmt>, Object> {
 
 		Vector<ImcStmt> toReturn = new Vector<>();
 		toReturn.addAll(addrStmts);
-		toReturn.add(new ImcMOVE(t1, addrExpr));
 		
-		toReturn.add(new ImcESTMT(new ImcMEM(t1)));
+		if (visArg instanceof Temp) {
+			toReturn.add(new ImcMOVE(new ImcTEMP((Temp)visArg), addrExpr));
+		} else {
+			toReturn.add(new ImcMOVE(t1, addrExpr));
+			toReturn.add(new ImcESTMT(new ImcMEM(t1)));
+		}
 		
 		return toReturn;
 	}
