@@ -70,7 +70,12 @@ public class StmtCanonizer implements ImcVisitor<Vector<ImcStmt>, Object> {
 		toReturn.add(new ImcMOVE(t2, sndExpr));
 		
 		// This gets poped by the ExprCanonizer, hopefully
-		toReturn.add(new ImcESTMT(new ImcBINOP(binOp.oper, t1, t2)));
+		
+		if (visArg instanceof Temp) {
+			toReturn.add(new ImcMOVE(new ImcTEMP((Temp)visArg), new ImcBINOP(binOp.oper, t1, t2)));
+		} else {
+			toReturn.add(new ImcESTMT(new ImcBINOP(binOp.oper, t1, t2)));
+		}
 		
 		return toReturn;
 	}
@@ -86,8 +91,11 @@ public class StmtCanonizer implements ImcVisitor<Vector<ImcStmt>, Object> {
 		toReturn.addAll(subStmts);
 		toReturn.add(new ImcMOVE(t1, subExpr));
 		
-		toReturn.add(new ImcESTMT(new ImcUNOP(unOp.oper, t1)));
-		
+		if (visArg instanceof Temp) {
+			toReturn.add(new ImcMOVE(new ImcTEMP((Temp)visArg), new ImcUNOP(unOp.oper, t1)));
+		} else {
+			toReturn.add(new ImcESTMT(new ImcUNOP(unOp.oper, t1)));
+		}
 		return toReturn;
 	}
 	
@@ -156,8 +164,11 @@ public class StmtCanonizer implements ImcVisitor<Vector<ImcStmt>, Object> {
 			toReturn.add(new ImcMOVE(newTemp, arg.accept(new ExprCanonizer(), toReturn)));
 		}
 		
-		toReturn.add(new ImcESTMT(new ImcCALL(call.label, newArgs)));
-		 
+		if (visArg instanceof Temp) {
+			toReturn.add(new ImcMOVE(new ImcTEMP((Temp)visArg), new ImcCALL(call.label, newArgs)));
+		} else {
+			toReturn.add(new ImcESTMT(new ImcCALL(call.label, newArgs)));
+		}
 		return toReturn;
 	}
 	
