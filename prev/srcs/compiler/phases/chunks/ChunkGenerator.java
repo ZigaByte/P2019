@@ -25,7 +25,7 @@ public class ChunkGenerator extends AbsFullVisitor<Object, Object> {
 		
 		ImcExpr bodyExpr = ImcGen.exprImCode.get(funDef.value);
 
-		Label entryLabel = new Label(funDef.name);
+		Label entryLabel = new Label();
 		Label exitLabel = new Label();
 		
 		Vector<ImcStmt> funStmts = new Vector<>();
