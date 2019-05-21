@@ -28,10 +28,10 @@ public class LiveAn extends Phase {
 				AsmInstr inst = code.instrs.get(i);
 				{ // IN
 					HashSet<Temp> newIn = new HashSet<>();
-					newIn.addAll(inst.uses());
 					newIn.addAll(inst.out());
 					newIn.removeAll(inst.defs());
-					
+					newIn.addAll(inst.uses());
+
 					if (!newIn.equals(inst.in())){
 						changed = true;
 						inst.addInTemps(newIn);
