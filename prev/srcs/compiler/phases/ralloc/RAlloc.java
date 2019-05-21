@@ -4,8 +4,12 @@
 package compiler.phases.ralloc;
 
 import compiler.data.asmcode.*;
+import compiler.data.chunk.Chunk;
+import compiler.data.chunk.CodeChunk;
+import compiler.data.imcode.ImcStmt;
 import compiler.phases.*;
 import compiler.phases.asmcode.*;
+import compiler.phases.chunks.Chunks;
 
 /**
  * Register allocation phase.
@@ -23,7 +27,9 @@ public class RAlloc extends Phase {
 	 * If necessary, the code of each function is modified.
 	 */
 	public void tempsToRegs() {
-		// TODO
+		for(Code code : AsmGen.codes) {
+			new RAllocCode(code).run();
+		}
 	}
 
 	public void log() {
