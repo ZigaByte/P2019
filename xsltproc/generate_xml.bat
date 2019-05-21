@@ -7,3 +7,4 @@ xsltproc.exe --output output/imcgen.html ../prev/data/imcgen.xsl ../tests/test.i
 xsltproc.exe --output output/chunks.html ../prev/data/chunks.xsl ../tests/test.chunks.xml
 xsltproc.exe --output output/asmgen.html ../prev/data/asmgen.xsl ../tests/test.asmgen.xml
 xsltproc.exe --output output/livean.html ../prev/data/livean.xsl ../tests/test.livean.xml
+xsltproc.exe --output output/ralloc.html ../prev/data/ralloc.xsl ../tests/test.ralloc.xml
