@@ -38,7 +38,7 @@ public class StmtGenerator implements ImcVisitor<Vector<AsmInstr>, Object> {
 			// Resolve address
 			uses.add(memExpr.addr.accept(new ExprGenerator(), toReturn));
 			
-			toReturn.add(new AsmOPER("STO `s0,`s1, 0", uses, null, null));	
+			toReturn.add(new AsmOPER("STO `s0,`s1,0", uses, null, null));	
 		} else {
 			// Else move into temp			
 			defs.add(move.dst.accept(new ExprGenerator(), toReturn));
