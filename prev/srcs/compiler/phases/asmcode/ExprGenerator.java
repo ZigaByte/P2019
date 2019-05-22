@@ -32,9 +32,12 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		value >>= 16;
 		
 		visArg.add(new AsmOPER("SETL `d0," + l, null, defs, null));
-		visArg.add(new AsmOPER("INCML `s0," + ml, defs, defs, null));
-		visArg.add(new AsmOPER("INCMH `s0," + mh, defs, defs, null));
-		visArg.add(new AsmOPER("INCH `s0," + h, defs, defs, null));
+		if(ml != 0)
+			visArg.add(new AsmOPER("INCML `s0," + ml, defs, defs, null));
+		if(mh != 0)
+			visArg.add(new AsmOPER("INCMH `s0," + mh, defs, defs, null));
+		if(h != 0)
+			visArg.add(new AsmOPER("INCH `s0," + h, defs, defs, null));
 
 		return temp;
 	}
@@ -153,9 +156,9 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		Temp temp = new Temp();
 		defs.add(temp);
 		
-		visArg.add(new AsmOPER("GET `d0," + name.label.name, null, uses, null));
+		//visArg.add(new AsmOPER("GET `d0," + name.label.name, null, uses, null));
 		
-		visArg.add(new AsmOPER("LDO `d0,`s0,0", uses, defs, null));
+		visArg.add(new AsmOPER("LDO `d0,"+ name.label.name, null, defs, null));
 		
 		return temp;
 	}
