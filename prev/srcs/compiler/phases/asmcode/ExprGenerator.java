@@ -14,11 +14,21 @@ import compiler.data.asmcode.*;
  */
 public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 
+	Temp temp = null;
+	
+	public ExprGenerator() {
+		this(new Temp());
+	}
+	
+	public ExprGenerator(Temp t) {
+		this.temp = t;
+	}
+	
+	
 	@Override
 	public Temp visit(ImcCONST constant, Vector<AsmInstr> visArg) {
 		Vector<Temp> defs = new Vector<>();
 		
-		Temp temp = new Temp();
 		defs.add(temp);
 		
 		long value = constant.value;
@@ -52,7 +62,6 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		Vector<Temp> defs = new Vector<>();
 		Vector<Temp> uses = new Vector<>();
 		
-		Temp temp = new Temp();
 		defs.add(temp);
 		
 		uses.add(binOp.fstExpr.accept(this, visArg));
@@ -130,7 +139,6 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		Vector<Temp> defs = new Vector<>();
 		Vector<Temp> uses = new Vector<>();
 		
-		Temp temp = new Temp();
 		defs.add(temp);
 		
 		uses.add(unOp.subExpr.accept(this, visArg));
@@ -153,7 +161,7 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		uses.add(new Temp());
 		
 		Vector<Temp> defs = new Vector<>();
-		Temp temp = new Temp();
+
 		defs.add(temp);
 		
 		//visArg.add(new AsmOPER("GET `d0," + name.label.name, null, uses, null));
@@ -169,7 +177,6 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		Vector<Temp> defs = new Vector<>();
 		Vector<Temp> uses = new Vector<>();
 
-		Temp temp = new Temp();
 		defs.add(temp);		
 		uses.add(mem.addr.accept(this, visArg));
 
@@ -199,7 +206,7 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		visArg.add(new AsmOPER("PUSHJ $15," + call.label.name, null, null, jumps));
 		
 		// Load return value
-		Temp result = new Temp();
+		Temp result = temp;
 		Vector<Temp> defs = new Vector<Temp>();
 		defs.add(result);
 		visArg.add(new AsmOPER("LDO `d0,$254,0" , null, defs, null));		

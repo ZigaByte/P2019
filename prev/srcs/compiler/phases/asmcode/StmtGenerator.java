@@ -40,11 +40,12 @@ public class StmtGenerator implements ImcVisitor<Vector<AsmInstr>, Object> {
 			
 			toReturn.add(new AsmOPER("STO `s0,`s1,0", uses, null, null));	
 		} else {
-			// Else move into temp			
-			defs.add(move.dst.accept(new ExprGenerator(), toReturn));
-			uses.add(move.src.accept(new ExprGenerator(), toReturn));
+			// Else move into temp
+			//defs.add(move.dst.accept(new ExprGenerator(), toReturn));
+			Temp temp = move.dst.accept(new ExprGenerator(), toReturn);
+			uses.add(move.src.accept(new ExprGenerator(temp), toReturn));
 			
-			toReturn.add(new AsmMOVE("SET `d0,`s0", uses, defs));
+			//toReturn.add(new AsmMOVE("SET `d0,`s0", uses, defs));
 		}
 		
 		return toReturn;
