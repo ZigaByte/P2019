@@ -1,5 +1,6 @@
 package compiler.phases.ralloc;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Stack;
@@ -9,9 +10,7 @@ import compiler.Main;
 import compiler.data.asmcode.AsmInstr;
 import compiler.data.asmcode.AsmOPER;
 import compiler.data.asmcode.Code;
-import compiler.data.layout.Label;
 import compiler.data.layout.Temp;
-import compiler.phases.asmcode.AsmGen;
 import compiler.phases.livean.LiveAn;
 
 class Node{
@@ -143,7 +142,25 @@ public class RAllocCode {
 	
 	private Node spill() {
 		Node maxDeg = null;
+		int maxD = 0;
 		for(Node n: nodes.values()) {
+//			int start = 0;
+//			int end = 0;
+//			for(int i = 0; i < code.instrs.size();i++) {
+//				AsmInstr instr = code.instrs.get(i);
+//				if(instr.defs().contains(n.temp)) {
+//					start = Math.min(start, i);
+//				}
+//				if(instr.uses().contains(n.temp)) {
+//					end = Math.max(end, i);
+//				}
+//			}
+//			int d = end - start;
+//			if(d > maxD) {
+//				maxD = d;
+//				maxDeg = n;
+//			}
+			
 			if(maxDeg == null || n.connections.size() > maxDeg.connections.size()) {
 				maxDeg = n;
 			}
@@ -185,7 +202,9 @@ public class RAllocCode {
 		Vector<AsmInstr> newInstrs = new Vector<>();
 		
 		for(AsmInstr instr : code.instrs) {
-			if(instr.uses().contains(t) || instr.defs().contains(t)) {
+			boolean inUses = instr.uses().contains(t);
+			boolean inDefs = instr.defs().contains(t);
+			if(inDefs || inUses) {
 				// Handle it properly
 				long offset = code.frame.locsSize + 16 + tempSize;
 
@@ -201,22 +220,29 @@ public class RAllocCode {
 				uses.add(addressTemp);
 				newInstrs.add(new AsmOPER("SUB `d0,$253,`s0", uses, defs, null)); // Harcoded FP
 				
+				Temp valueTemp = new Temp();
+				
 				// If the instruction uses the temp, load it
-				if (instr.uses().contains(t)) {
+				if (inUses) {
 					defs = new Vector<>();
-					defs.add(t);
+					defs.add(valueTemp);
 					uses = new Vector<>();
 					uses.add(addressTemp);
 					newInstrs.add(new AsmOPER("LDO `d0,`s0,0", uses, defs, null));
 				}
 				
-				// Perform the instruction
-				newInstrs.add(instr);
-
+				//newInstrs.add(instr);
+				AsmOPER oper = (AsmOPER) instr;
+				Vector<Temp> operUses = oper.uses();
+				Vector<Temp> operDefs = oper.defs();
+				Collections.replaceAll(operUses, t, valueTemp);
+				Collections.replaceAll(operDefs, t, valueTemp);
+				newInstrs.add(new AsmOPER(oper.instr(), uses, defs, oper.jumps()));
+				
 				// Save the temp if it was defined (as in, changed)
-				if(instr.defs().contains(t)) {					
+				if(inDefs) {					
 					uses = new Vector<>();
-					uses.add(t);
+					uses.add(valueTemp);
 					uses.add(addressTemp);
 					newInstrs.add(new AsmOPER("STO `s0,`s1,0", uses, null, null));
 				}

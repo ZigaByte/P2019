@@ -66,6 +66,10 @@ public class AsmOPER extends AsmInstr {
 		this.in = new HashSet<Temp>();
 		this.out = new HashSet<Temp>();
 	}
+	
+	public String instr() {
+		return instr;
+	}
 
 	@Override
 	public Vector<Temp> uses() {
