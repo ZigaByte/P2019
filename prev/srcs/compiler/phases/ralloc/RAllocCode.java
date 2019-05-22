@@ -195,11 +195,11 @@ public class RAllocCode {
 				
 				defs = new Vector<>();
 				defs.addElement(addressTemp);
-				newInstrs.add(new AsmOPER("SPILL: SETL `d0," + offset, null, defs, null));
+				newInstrs.add(new AsmOPER("SETL `d0," + offset, null, defs, null));
 
 				uses = new Vector<>();
 				uses.add(addressTemp);
-				newInstrs.add(new AsmOPER("SPILL: SUB `d0,$253,`s0", uses, defs, null)); // Harcoded FP
+				newInstrs.add(new AsmOPER(t.temp+ " SPILL: SUB `d0,$253,`s0", uses, defs, null)); // Harcoded FP
 				
 				// If the instruction uses the temp, load it
 				if (instr.uses().contains(t)) {
@@ -207,7 +207,7 @@ public class RAllocCode {
 					defs.add(t);
 					uses = new Vector<>();
 					uses.add(addressTemp);
-					newInstrs.add(new AsmOPER("SPILL: LDO `d0,`s0,0", uses, defs, null));
+					newInstrs.add(new AsmOPER("LDO `d0,`s0,0", uses, defs, null));
 				}
 				
 				// Perform the instruction
@@ -218,7 +218,7 @@ public class RAllocCode {
 					uses = new Vector<>();
 					uses.add(t);
 					uses.add(addressTemp);
-					newInstrs.add(new AsmOPER("SPILL: STO `s0,`s1,0", uses, null, null));
+					newInstrs.add(new AsmOPER("STO `s0,`s1,0", uses, null, null));
 				}
 				
 			}else {
@@ -226,7 +226,7 @@ public class RAllocCode {
 			}
 		}
 		
-		System.out.println("Updating instructions, now with " + newInstrs.size() + " previous: " + code.instrs.size());
+		//System.out.println("Updating instructions, now with " + newInstrs.size() + " previous: " + code.instrs.size());
 		code = new Code(code.frame, code.entryLabel, code.exitLabel, newInstrs);
 	}
 }
