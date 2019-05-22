@@ -199,7 +199,7 @@ public class RAllocCode {
 
 				uses = new Vector<>();
 				uses.add(addressTemp);
-				newInstrs.add(new AsmOPER(t.temp+ " SPILL: SUB `d0,$253,`s0", uses, defs, null)); // Harcoded FP
+				newInstrs.add(new AsmOPER("SUB `d0,$253,`s0", uses, defs, null)); // Harcoded FP
 				
 				// If the instruction uses the temp, load it
 				if (instr.uses().contains(t)) {
