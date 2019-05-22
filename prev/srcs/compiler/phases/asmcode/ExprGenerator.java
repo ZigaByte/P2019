@@ -158,7 +158,7 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		
 		//visArg.add(new AsmOPER("GET `d0," + name.label.name, null, uses, null));
 		
-		visArg.add(new AsmOPER("LDO `d0,"+ name.label.name, null, defs, null));
+		visArg.add(new AsmOPER("LDA `d0,"+ name.label.name, null, defs, null));
 		
 		return temp;
 	}
