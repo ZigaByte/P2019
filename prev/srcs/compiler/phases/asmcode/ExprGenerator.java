@@ -193,9 +193,10 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		int offset = call.args().size() * 8;
 		
 		// Store parameters
-		for(ImcExpr expr: call.args()) {
+		for(int i = call.args().size() - 1; i >= 0; i--) {
+			ImcExpr expr = call.args().get(i);
 			offset -= 8;
-			
+
 			Temp temp = expr.accept(this, visArg);
 			
 			Vector<Temp> uses = new Vector<>();
