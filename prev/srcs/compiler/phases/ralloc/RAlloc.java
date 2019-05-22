@@ -3,6 +3,8 @@
  */
 package compiler.phases.ralloc;
 
+import java.util.Vector;
+
 import compiler.data.asmcode.*;
 import compiler.data.chunk.Chunk;
 import compiler.data.chunk.CodeChunk;
@@ -18,6 +20,8 @@ import compiler.phases.chunks.Chunks;
  */
 public class RAlloc extends Phase {
 
+	public Vector<Code> newCodes = new Vector<Code>();
+	
 	public RAlloc() {
 		super("ralloc");
 	}
@@ -28,8 +32,9 @@ public class RAlloc extends Phase {
 	 */
 	public void tempsToRegs() {
 		for(Code code : AsmGen.codes) {
-			new RAllocCode(code).run();
+			new RAllocCode(this, code).run();
 		}
+		AsmGen.codes = newCodes;
 	}
 
 	public void log() {
