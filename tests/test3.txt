@@ -1,0 +1,14 @@
+var a:int;
+var b:int;
+var c:int;
+var d:int;
+var e:int;
+
+fun main():int={
+	test(a, b, c, d, e);
+	a = 0;
+	
+:0
+where
+fun test(a:int,b:int,c:int,d:int,e:int ):int=3;
+};
