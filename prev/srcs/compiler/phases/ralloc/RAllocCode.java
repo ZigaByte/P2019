@@ -135,36 +135,46 @@ public class RAllocCode {
 				return n;
 			}
 		}
-		
+		Node spill = spill();
+
 		// If none was found return spill
-		return spill();
+		return spill;
 	}
 	
 	private Node spill() {
-		Node maxDeg = null;
-		int maxD = 0;
+
+		Vector<Node> spills = new Vector<>();
 		for(Node n: nodes.values()) {
-//			int start = 0;
-//			int end = 0;
-//			for(int i = 0; i < code.instrs.size();i++) {
-//				AsmInstr instr = code.instrs.get(i);
-//				if(instr.defs().contains(n.temp)) {
-//					start = Math.min(start, i);
-//				}
-//				if(instr.uses().contains(n.temp)) {
-//					end = Math.max(end, i);
-//				}
-//			}
-//			int d = end - start;
-//			if(d > maxD) {
-//				maxD = d;
-//				maxDeg = n;
-//			}
-			
-			if(maxDeg == null || n.connections.size() > maxDeg.connections.size()) {
-				maxDeg = n;
+			if(spills.isEmpty() || n.connections.size() > spills.get(0).connections.size()) {
+				spills.clear();
+				spills.add(n);
 			}
 		}
+		
+		Node maxDeg = null;
+		int maxD = 0;
+		for(Node n: spills) {
+			int start = Integer.MAX_VALUE;
+			int end = 0;
+			for(int i = 0; i < code.instrs.size();i++) {
+				AsmInstr instr = code.instrs.get(i);
+				if(instr.defs().contains(n.temp)) {
+					start = Math.min(start, i);
+				}
+				if(instr.uses().contains(n.temp)) {
+					end = Math.max(end, i);
+				}
+			}
+			int d = end - start;
+			if(d > maxD) {
+				maxD = d;
+				maxDeg = n;
+			}
+
+		}
+		if(maxDeg == null)
+			return spills.get(0);
+		
 		return maxDeg;
 	}
 	
