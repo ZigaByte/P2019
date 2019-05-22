@@ -21,6 +21,10 @@ public class LiveAn extends Phase {
 	private HashMap<Label, AsmInstr> labels = new HashMap<>();
 	
 	public void chunkLiveness(Code code) {
+		for(AsmInstr instr: code.instrs) {
+			((AsmOPER)instr).resetInOut();
+		}
+		
 		boolean changed = true;
 		while(changed) {
 			changed = false;

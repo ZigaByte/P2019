@@ -42,13 +42,13 @@ public class AsmOPER extends AsmInstr {
 	 * The set of temporaries that are live in the control flow graph edges leading
 	 * to this instruction.
 	 */
-	private final HashSet<Temp> in;
+	private HashSet<Temp> in;
 
 	/**
 	 * The set of temporaries that are live in the control flow graph edges leading
 	 * from this instruction.
 	 */
-	private final HashSet<Temp> out;
+	private HashSet<Temp> out;
 
 	/**
 	 * Constructs a new assembly instruction.
@@ -90,6 +90,11 @@ public class AsmOPER extends AsmInstr {
 	@Override
 	public HashSet<Temp> out() {
 		return new HashSet<Temp>(out);
+	}
+	
+	public void resetInOut() {
+		in = new HashSet<>();
+		out = new HashSet<>();
 	}
 
 	@Override
