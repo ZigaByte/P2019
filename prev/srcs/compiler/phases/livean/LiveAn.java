@@ -40,6 +40,7 @@ public class LiveAn extends Phase {
 				
 				{ // OUT
 					HashSet<Temp> toAdd = new HashSet<>();
+					toAdd.addAll(inst.defs());
 					
 					// Add from next instruction, unless this is an unconditional jump?
 					if(i != code.instrs.size() - 1) {
