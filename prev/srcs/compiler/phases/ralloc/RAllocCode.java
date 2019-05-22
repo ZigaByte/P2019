@@ -196,9 +196,7 @@ public class RAllocCode {
 	
 	private void modifyCodeToSpill(Temp t) {
 		tempSize += 8;
-		
-		System.out.println("Spilling " + t);
-		
+				
 		Vector<AsmInstr> newInstrs = new Vector<>();
 		
 		for(AsmInstr instr : code.instrs) {
