@@ -3,10 +3,12 @@
  */
 package compiler;
 
+import java.io.IOException;
 import java.util.*;
 import compiler.common.report.*;
 import compiler.phases.lexan.*;
 import compiler.phases.synan.*;
+import compiler.phases.wrapup.Wrapup;
 import compiler.phases.abstr.*;
 import compiler.phases.asmcode.*;
 import compiler.phases.seman.*;
@@ -182,10 +184,6 @@ public class Main {
 				try (Chunks chunks = new Chunks()) {
 					Abstr.absTree.accept(new ChunkGenerator(), null);
 					chunks.log();
-
-					// Interpreter interpreter = new Interpreter(Chunks.dataChunks,
-					// Chunks.codeChunks);
-					// System.out.println("EXIT CODE: " + interpreter.run("_main"));
 				}
 				if (cmdLine.get("--target-phase").equals("chunks"))
 					break;
@@ -213,6 +211,13 @@ public class Main {
 				}
 				if (cmdLine.get("--target-phase").equals("ralloc"))
 					break;
+				
+				// Wrapup and output
+				try(Wrapup wrapup = new Wrapup()){
+					wrapup.print();
+				} catch (IOException e) {
+					System.out.println("Could not write to file.");
+				}
 
 				int endWarnings = Report.numOfWarnings();
 				if (begWarnings != endWarnings)
@@ -221,10 +226,6 @@ public class Main {
 			} while (false);
 
 			Report.info("Done.");
-			
-			// Run interpreter
-			//Interpreter interpreter = new Interpreter(Chunks.dataChunks, Chunks.codeChunks);
-			//interpreter.run("_main");
 		} catch (Report.Error __) {
 		}
 	}
