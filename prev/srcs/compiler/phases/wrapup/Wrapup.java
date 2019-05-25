@@ -42,7 +42,7 @@ public class Wrapup extends Phase{
 					decl += i == 0 ? "0" : ",0";
 				}
 				writer.println(decl);
-			}
+			}	
 		}
 		
 		writer.println();
@@ -52,15 +52,18 @@ public class Wrapup extends Phase{
 		writer.println();
 		writer.println("% Entry point");
 		writer.println("Main\tSET $0,#FFFF");
+		// Make sure enough registers are global
+		writer.println("\tSET $0,#FC");
+		writer.println("\tPUT rG,$0");
 		
 		// Set SP and FP initial value
-		writer.println("\tSETH $254,#6000"); // SP
-		writer.println("\tINCL $254,#100"); // SP
+		writer.println("\tSETH $252,#6000"); // SP
+		writer.println("\tINCL $252,#100"); // SP
 		writer.println("\tSETH $253,#FFFF"); // FP, should not matter, but still // TODO: cONSIDER THE FFFF
 		writer.println("\tPUT rJ,$0"); // rJ debug TODO: cONSIDER removing
 		
 		// Jump to main?
-		writer.println("\tJMP _main");
+		writer.println("\tPUSHJ $0,_main");
 		
 		// TODO: Startup
 		
@@ -79,7 +82,7 @@ public class Wrapup extends Phase{
 			writer.println(code.frame.label.name + "\tSET $0,0 ");
 			
 			// Save the old FP
-			writer.println("\tSET $0,$254");
+			writer.println("\tSET $0,$252");
 			writer.println("\tSUB $0,$0," + (code.frame.locsSize + 8));
 			writer.println("\tSTO $253,$0,0");
 			
@@ -89,8 +92,8 @@ public class Wrapup extends Phase{
 			writer.println("\tSTO $1,$0,0");
 			
 			// Increase FP and SP
-			writer.println("\tSET $253,$254");
-			writer.println("\tSUB $254,$254," + code.frame.size);
+			writer.println("\tSET $253,$252");
+			writer.println("\tSUB $252,$252," + code.frame.size);
 			
 			// Jump to body
 			writer.println("\tJMP " + code.entryLabel.name);
@@ -119,7 +122,7 @@ public class Wrapup extends Phase{
 			writer.println("\tLDO $1,$0,0"); // load old FP
 			
 			// Move SP and FP
-			writer.println("\tSET $254,$253");
+			writer.println("\tSET $252,$253");
 			writer.println("\tSET $253,$1");
 			
 			// Restore rJ
