@@ -62,9 +62,7 @@ public class RAllocCode {
 	}
 	
 	private void build() {
-		// Return temp can be whatever TODO
 		regs = new HashMap<Temp, Integer>();
-		regs.put(code.frame.RV, 1);
 		
 		nodes = new HashMap<Temp, Node>();
 		// Add all temps to graph
@@ -85,11 +83,18 @@ public class RAllocCode {
 				}
 			}
 		}
+
+		// FP is harcoded
+		nodes.remove(code.frame.FP);
+		regs.put(code.frame.FP, 253);
+		
 		// Insert connections
 		for(AsmInstr inst: code.instrs) {
 			// Two in the same in
 			for(Temp t1 :inst.in()) {
 				for(Temp t2 :inst.in()) {
+					if(t1.equals(code.frame.FP) || t2.equals(code.frame.FP))
+						continue;
 					if(t1 != t2) {
 						nodes.get(t1).connections.add(nodes.get(t2));
 						nodes.get(t2).connections.add(nodes.get(t1));
@@ -103,6 +108,8 @@ public class RAllocCode {
 			// Two in the same out
 			for(Temp t1 :inst.out()) {
 				for(Temp t2 :inst.out()) {
+					if(t1.equals(code.frame.FP) || t2.equals(code.frame.FP))
+						continue;
 					if(t1 != t2) {
 						nodes.get(t1).connections.add(nodes.get(t2));
 						nodes.get(t2).connections.add(nodes.get(t1));
