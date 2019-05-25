@@ -32,7 +32,7 @@ public class Main {
 	private static HashMap<String, String> cmdLine = new HashMap<String, String>();
 
 	/** The number of general-purpose registers. */
-	public static final int numOfRegs = 8;
+	public static final int numOfRegs = 16;
 
 	/**
 	 * Returns the value of a command line argument.
@@ -205,7 +205,9 @@ public class Main {
 					break;
 
 				// Register allocation.
-				try (RAlloc ralloc = new RAlloc()) {
+				RAlloc ralloc;
+				try (RAlloc r = new RAlloc()) {
+					ralloc = r;
 					ralloc.tempsToRegs();
 					ralloc.log();
 				}
@@ -213,7 +215,7 @@ public class Main {
 					break;
 				
 				// Wrapup and output
-				try(Wrapup wrapup = new Wrapup()){
+				try(Wrapup wrapup = new Wrapup(ralloc)){
 					wrapup.print();
 				} catch (IOException e) {
 					System.out.println("Could not write to file.");

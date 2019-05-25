@@ -204,7 +204,7 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 			visArg.add(new AsmOPER("STO `s0,$254,"+offset , uses, null, null));
 		}
 		
-		visArg.add(new AsmOPER("PUSHJ $15," + call.label.name, null, null, jumps));
+		visArg.add(new AsmOPER("PUSHJ $16," + call.label.name, null, null, jumps));
 		
 		// Load return value
 		Temp result = temp;
