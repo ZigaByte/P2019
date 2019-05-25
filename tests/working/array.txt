@@ -1,0 +1,12 @@
+var a : arr [10] int; 
+
+fun main():int ={
+	i = 0;
+	while (i < 10) do
+		i = i+1;
+		a[i] = i;
+	end;
+	:0
+	where
+	var i : int;
+};

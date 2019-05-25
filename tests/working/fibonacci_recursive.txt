@@ -1,0 +1,23 @@
+var array : arr [10] int; 
+
+fun main():int ={
+	j = 0;
+	while (j < 10) do
+		array[j] = fib(j);
+		j = j + 1;
+	end;
+	:0
+	where
+	var j : int;
+};
+
+fun fib(n:int):int={
+	if(n == 0 | n == 1) then
+		x = 1;
+	else
+		x = fib(n - 1) + fib(n - 2);
+	end;
+	:x
+	where
+	var x: int;
+};
