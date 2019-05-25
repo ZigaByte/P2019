@@ -87,7 +87,7 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 			instr = "AND";
 			break;
 		case IOR:
-			instr = "IOR";
+			instr = "OR";
 			break;
 		case XOR:
 			instr = "XOR";
