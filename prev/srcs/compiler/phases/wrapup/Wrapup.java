@@ -42,9 +42,10 @@ public class Wrapup extends Phase{
 				"D251	OCTA 0"); // Reserve some global registers
 		
 		writer.println("\n\n\tGREG @");
-		writer.println("_print	OCTA 0,0 % Print value");
+		writer.println("_print	OCTA 0,0,0,0,0,0,0,0,0,0,0\r\n" + 
+				"		OCTA 0,0,0,0,0,0,0,0,0,0,0 % Print space");
 		
-		int size = 0;
+		int size = 184;
 		for(DataChunk chunk : Chunks.dataChunks) {
 			if(size >= 256) {
 				size = 0;
@@ -70,9 +71,6 @@ public class Wrapup extends Phase{
 		writer.println();
 		writer.println("% Entry point");
 		writer.println("Main\tSET $0,#FFFF");
-		// Make sure enough registers are global
-		//writer.println("\tSET $0,#FB");
-		//writer.println("\tPUT rG,$0");
 		
 		// Set SP and FP initial value
 		writer.println("\tSETH $251,#2000 % Heap Pointer");
@@ -82,8 +80,6 @@ public class Wrapup extends Phase{
 		
 		// Jump to main?
 		writer.println("\tPUSHJ $0,_main");
-		
-		// TODO: Startup
 		
 		writer.println("\tTRAP 0,Halt,0");
 		
@@ -171,16 +167,31 @@ public class Wrapup extends Phase{
 				"	POP");
 		writer.println("_putInt	SET $0,$252\r\n" + 
 				"	ADD $0,$0,8\r\n" + 
-				"	LDO $0,$0,0\r\n" + 
+				"	LDO $0,$0,0 % value in $0\r\n" + 
+				"	CMP $4,$0,0\r\n" + 
+				"	CSN $3,$4,1 % $3 = 1 if we have a negative number\r\n" + 
+				"	BZ $3,PI0\r\n" + 
+				"	NEG $0,$0 % Negate if negative\r\n" + 
+				"	SET $2,0 % Cell count in $2\r\n" + 
 				"PI0	DIV $0,$0,10\r\n" + 
 				"	GET	$1,rR\r\n" + 
-				"	ADD $1,$1,48\r\n" + 
-				"	LDA $255,_print\r\n" + 
-				"	STO $1,$255,0\r\n" + 
-				"	ADD $255,$255,7\r\n" + 
-				"	TRAP 0,Fputs,StdOut\r\n" + 
+				"	ADD $1,$1,48 $ Current digit in $1\r\n" + 
+				"	LDA $4,_print\r\n" + 
+				"	STO $1,$4,$2\r\n" + 
+				"	ADD $2,$2,8\r\n" + 
 				"	BNZ $0,PI0\r\n" + 
-				"	POP");
+				"	BZ $3,PI2\r\n" + 
+				"	SET $1,45 % Get - if negative\r\n" + 
+				"	STO $1,$4,$2\r\n" + 
+				"	ADD $2,$2,8\r\n" + 
+				"PI2	SUB $2,$2,8\r\n" + 
+				"	LDA $255,_print\r\n" + 
+				"	ADD $255,$255,7\r\n" + 
+				"	ADD $255,$255,$2\r\n" + 
+				"	TRAP 0,Fputs,StdOut\r\n" + 
+				"	CMP $4,$2,0\r\n" + 
+				"	BNZ $4,PI2\r\n" + 
+				"PI1	POP");
 		writer.println("_putChar	SET $0,$252\r\n" + 
 				"	ADD $0,$0,8\r\n" + 
 				"	LDO $0,$0,0\r\n" + 
