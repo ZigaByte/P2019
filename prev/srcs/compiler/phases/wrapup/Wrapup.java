@@ -32,21 +32,36 @@ public class Wrapup extends Phase{
 		writer.println("% " + Main.cmdLineArgValue("--src-file-name"));
 		// Data segment
 		writer.println("\tLOC\t#100");
-		writer.println("\tGREG\t@");
+		writer.println("		GREG	@\r\n" + 
+				"D254	OCTA 0\r\n" + 
+				"		GREG	@\r\n" + 
+				"D253	OCTA 0\r\n" + 
+				"		GREG	@\r\n" + 
+				"D252	OCTA 0\r\n" + 
+				"		GREG	@\r\n" + 
+				"D251	OCTA 0"); // Reserve some global registers
 		
-		writer.print("_print	OCTA 0,0 % Print value\n");
+		writer.println("\n\n\tGREG @");
+		writer.println("_print	OCTA 0,0 % Print value");
 		
+		int size = 0;
 		for(DataChunk chunk : Chunks.dataChunks) {
+			if(size >= 256) {
+				size = 0;
+				writer.println("\tGREG @");
+			}
 			if(chunk.init != null && chunk.init.startsWith("\"")) {
 				String decl = chunk.label.name + "\t\t" + "OCTA\t" + chunk.init + ",0";
+				size += chunk.init.length()*8 + 1;
 				writer.println(decl);
 			} else {
 				String decl = chunk.label.name + "\t" + "OCTA\t";
+				size += chunk.size;
 				for(int i = 0; i < chunk.size / 8; i++) {
 					decl += i == 0 ? "0" : ",0";
 				}
 				writer.println(decl);
-			}	
+			}
 		}
 		
 		writer.println();
@@ -56,8 +71,8 @@ public class Wrapup extends Phase{
 		writer.println("% Entry point");
 		writer.println("Main\tSET $0,#FFFF");
 		// Make sure enough registers are global
-		writer.println("\tSET $0,#FB");
-		writer.println("\tPUT rG,$0");
+		//writer.println("\tSET $0,#FB");
+		//writer.println("\tPUT rG,$0");
 		
 		// Set SP and FP initial value
 		writer.println("\tSETH $251,#2000 % Heap Pointer");
@@ -83,6 +98,10 @@ public class Wrapup extends Phase{
 
 			writer.println("% - Prologue");
 			writer.println(code.frame.label.name + "\tSET $0,0 ");
+			
+			//System.out.println(code.frame.locsSize);
+			//System.out.println(code.frame.argsSize);
+			//System.out.println(code.frame.size);
 			
 			// Save the old FP
 			writer.println("\tSET $0,$252");
