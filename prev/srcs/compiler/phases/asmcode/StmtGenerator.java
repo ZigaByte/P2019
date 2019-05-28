@@ -3,12 +3,23 @@
  */
 package compiler.phases.asmcode;
 
-import java.util.*;
-import compiler.data.imcode.*;
-import compiler.data.imcode.visitor.*;
-import compiler.data.layout.*;
-import compiler.data.asmcode.*;
-import compiler.common.report.*;
+import java.util.Vector;
+
+import compiler.data.asmcode.AsmInstr;
+import compiler.data.asmcode.AsmLABEL;
+import compiler.data.asmcode.AsmMOVE;
+import compiler.data.asmcode.AsmOPER;
+import compiler.data.imcode.ImcCJUMP;
+import compiler.data.imcode.ImcESTMT;
+import compiler.data.imcode.ImcExpr;
+import compiler.data.imcode.ImcJUMP;
+import compiler.data.imcode.ImcLABEL;
+import compiler.data.imcode.ImcMEM;
+import compiler.data.imcode.ImcMOVE;
+import compiler.data.imcode.ImcTEMP;
+import compiler.data.imcode.visitor.ImcVisitor;
+import compiler.data.layout.Label;
+import compiler.data.layout.Temp;
 
 /**
  * @author sliva

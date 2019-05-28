@@ -43,6 +43,8 @@ public class ChunkGenerator extends AbsFullVisitor<Object, Object> {
 		case STR:
 			Chunks.dataChunks.add(new DataChunk(Frames.strings.get(atomExpr)));
 			break;
+		default:
+		break;
 		}
 		return super.visit(atomExpr, visArg);
 	}

@@ -5,13 +5,10 @@ package compiler.phases.ralloc;
 
 import java.util.Vector;
 
-import compiler.data.asmcode.*;
-import compiler.data.chunk.Chunk;
-import compiler.data.chunk.CodeChunk;
-import compiler.data.imcode.ImcStmt;
-import compiler.phases.*;
-import compiler.phases.asmcode.*;
-import compiler.phases.chunks.Chunks;
+import compiler.data.asmcode.AsmInstr;
+import compiler.data.asmcode.Code;
+import compiler.phases.Phase;
+import compiler.phases.asmcode.AsmGen;
 
 /**
  * Register allocation phase.
