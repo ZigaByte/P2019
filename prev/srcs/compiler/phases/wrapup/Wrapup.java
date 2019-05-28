@@ -86,7 +86,8 @@ public class Wrapup extends Phase{
 			
 			// Save the old FP
 			writer.println("\tSET $0,$252");
-			writer.println("\tSUB $0,$0," + (code.frame.locsSize + 8));
+			writer.println("\tSETL $2,"+ (code.frame.locsSize + 8));
+			writer.println("\tSUB $0,$0,$2" );
 			writer.println("\tSTO $253,$0,0");
 			
 			// Save the return address
@@ -96,7 +97,8 @@ public class Wrapup extends Phase{
 			
 			// Increase FP and SP
 			writer.println("\tSET $253,$252");
-			writer.println("\tSUB $252,$252," + code.frame.size);
+			writer.println("\tSETL $2,"+ code.frame.size);
+			writer.println("\tSUB $252,$252,$2");
 			
 			// Jump to body
 			writer.println("\tJMP " + code.entryLabel.name);
@@ -121,7 +123,8 @@ public class Wrapup extends Phase{
 			writer.println(code.exitLabel.name + "\tSTO $0,$253,0"); // Write return value to frame
 
 			writer.println("\tSET $0,$253");
-			writer.println("\tSUB $0,$0," + (code.frame.locsSize + 8));
+			writer.println("\tSETL $2,"+ (code.frame.locsSize + 8));
+			writer.println("\tSUB $0,$0,$2");
 			writer.println("\tLDO $1,$0,0"); // load old FP
 			
 			// Move SP and FP
@@ -171,7 +174,7 @@ public class Wrapup extends Phase{
 				"	ADD $0,$0,8\r\n" + 
 				"	LDO $0,$0,0\r\n" + 
 				"	SET $255,$0\r\n" + 
-				"	SET $2,7 %offset\r\n" + 
+				"	SET $2,7\r\n" + 
 				"	ADD $255,$255,$2\r\n" + 
 				"PS0	TRAP 0,Fputs,StdOut\r\n" + 
 				"	ADD $2,$2,8\r\n" + 
