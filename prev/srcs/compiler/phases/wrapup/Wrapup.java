@@ -33,6 +33,9 @@ public class Wrapup extends Phase{
 		// Data segment
 		writer.println("\tLOC\t#100");
 		writer.println("\tGREG\t@");
+		
+		writer.print("_print	OCTA 0,0 % Print value\n");
+		
 		for(DataChunk chunk : Chunks.dataChunks) {
 			if(chunk.init != null && chunk.init.startsWith("\"")) {
 				String decl = chunk.label.name + "\t\t" + "OCTA\t" + chunk.init + ",0";
@@ -143,6 +146,38 @@ public class Wrapup extends Phase{
 				"	ADD $0,$0,8\r\n" + 
 				"	LDO $1,$0,0\r\n" + 
 				"	ADD $251,$251,$1\r\n" + 
+				"	POP");
+		writer.println("_putInt	SET $0,$252\r\n" + 
+				"	ADD $0,$0,8\r\n" + 
+				"	LDO $0,$0,0\r\n" + 
+				"PI0	DIV $0,$0,10\r\n" + 
+				"	GET	$1,rR\r\n" + 
+				"	ADD $1,$1,48\r\n" + 
+				"	LDA $255,_print\r\n" + 
+				"	STO $1,$255,0\r\n" + 
+				"	ADD $255,$255,7\r\n" + 
+				"	TRAP 0,Fputs,StdOut\r\n" + 
+				"	BNZ $0,PI0\r\n" + 
+				"	POP");
+		writer.println("_putChar	SET $0,$252\r\n" + 
+				"	ADD $0,$0,8\r\n" + 
+				"	LDO $0,$0,0\r\n" + 
+				"	LDA $255,_print\r\n" + 
+				"	STO $0,$255,0\r\n" + 
+				"	ADD $255,$255,7\r\n" + 
+				"	TRAP 0,Fputs,StdOut\r\n" + 
+				"	POP");
+		writer.println("_putString SET $0,$252\r\n" + 
+				"	ADD $0,$0,8\r\n" + 
+				"	LDO $0,$0,0\r\n" + 
+				"	SET $255,$0\r\n" + 
+				"	SET $2,7 %offset\r\n" + 
+				"	ADD $255,$255,$2\r\n" + 
+				"PS0	TRAP 0,Fputs,StdOut\r\n" + 
+				"	ADD $2,$2,8\r\n" + 
+				"	ADD $255,$0,$2\r\n" + 
+				"	LDO $1,$255,0\r\n" + 
+				"	BNZ $1,PS0\r\n" + 
 				"	POP");
 
 		writer.close();
