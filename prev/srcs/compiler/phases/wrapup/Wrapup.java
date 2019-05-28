@@ -53,7 +53,7 @@ public class Wrapup extends Phase{
 		writer.println("% Entry point");
 		writer.println("Main\tSET $0,#FFFF");
 		// Make sure enough registers are global
-		writer.println("\tSET $0,#FC");
+		writer.println("\tSET $0,#FB");
 		writer.println("\tPUT rG,$0");
 		
 		// Set SP and FP initial value
@@ -137,6 +137,13 @@ public class Wrapup extends Phase{
 		}
 		
 		// New, del, etc.
+		writer.println("_del	POP\r\n" + 
+				"_new	STO $251,$252,0\r\n" + 
+				"	SET $0,$252\r\n" + 
+				"	ADD $0,$0,8\r\n" + 
+				"	LDO $1,$0,0\r\n" + 
+				"	ADD $251,$251,$1\r\n" + 
+				"	POP");
 
 		writer.close();
 	}
