@@ -1,3 +1,4 @@
+
 package compiler.phases.wrapup;
 
 import java.io.IOException;
@@ -30,11 +31,11 @@ public class Wrapup extends Phase{
 	public void print() throws IOException{
 		writer.println("% " + Main.cmdLineArgValue("--src-file-name"));
 		// Data segment
-		writer.println("\tLOC\t\tData_Segment");
+		writer.println("\tLOC\t#100");
 		writer.println("\tGREG\t@");
 		for(DataChunk chunk : Chunks.dataChunks) {
 			if(chunk.init != null && chunk.init.startsWith("\"")) {
-				String decl = chunk.label.name + "\t\t" + "BYTE\t" + chunk.init + ",0";
+				String decl = chunk.label.name + "\t\t" + "OCTA\t" + chunk.init + ",0";
 				writer.println(decl);
 			} else {
 				String decl = chunk.label.name + "\t" + "OCTA\t";
@@ -46,7 +47,6 @@ public class Wrapup extends Phase{
 		}
 		
 		writer.println();
-		writer.println("\tLOC\t\t#100");
 
 		// Entry point
 		writer.println();
@@ -57,10 +57,10 @@ public class Wrapup extends Phase{
 		writer.println("\tPUT rG,$0");
 		
 		// Set SP and FP initial value
-		writer.println("\tSETH $252,#6000"); // SP
-		writer.println("\tINCL $252,#100"); // SP
-		writer.println("\tSETH $253,#FFFF"); // FP, should not matter, but still // TODO: cONSIDER THE FFFF
-		writer.println("\tPUT rJ,$0"); // rJ debug TODO: cONSIDER removing
+		writer.println("\tSETH $251,#2000 % Heap Pointer");
+		writer.println("\tSETH $252,#4000 % Stack Pointer"); // SP
+		writer.println("\tINCL $252,#FFFF"); // SP
+		writer.println("\tSETH $253,#0 % Frame Pointer"); // FP, should not matter, but still // TODO: cONSIDER THE FFFF
 		
 		// Jump to main?
 		writer.println("\tPUSHJ $0,_main");
