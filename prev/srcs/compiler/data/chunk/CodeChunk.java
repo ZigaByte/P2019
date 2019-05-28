@@ -55,5 +55,9 @@ public class CodeChunk extends Chunk {
 	public Vector<ImcStmt> stmts() {
 		return new Vector<ImcStmt>(stmts);
 	}
+	
+	public Vector<ImcStmt> realStmts(){
+		return stmts;
+	}
 
 }

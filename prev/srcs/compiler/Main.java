@@ -183,6 +183,7 @@ public class Main {
 				// Chunks.
 				try (Chunks chunks = new Chunks()) {
 					Abstr.absTree.accept(new ChunkGenerator(), null);
+					Chunks.cleanChunks();
 					chunks.log();
 				}
 				if (cmdLine.get("--target-phase").equals("chunks"))
