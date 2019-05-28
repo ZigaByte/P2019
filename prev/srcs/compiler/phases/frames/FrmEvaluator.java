@@ -65,6 +65,7 @@ public class FrmEvaluator extends AbsFullVisitor<Object, FrmEvaluator.Context> {
 		Label label = funContext.depth == 1 ? new Label(funDef.name) : new Label();
 		
 		funContext.argsSize += new SemPtrType(new SemVoidType()).size(); // Add the Static link
+		funContext.argsSize += new SemPtrType(new SemVoidType()).size(); // Add space for new and delete. TODO: make this better
 		
 		Frame frame = new Frame(label, funContext.depth, funContext.locsSize, funContext.argsSize);
 		Frames.frames.put(funDef, frame);
@@ -81,6 +82,7 @@ public class FrmEvaluator extends AbsFullVisitor<Object, FrmEvaluator.Context> {
 		Label label = funContext.depth == 1 ? new Label(funDecl.name) : new Label();
 		
 		funContext.argsSize += new SemPtrType(new SemVoidType()).size(); // Add the Static link
+		funContext.argsSize += new SemPtrType(new SemVoidType()).size(); // Add space for new and delete. TODO: make this better
 		
 		Frame frame = new Frame(label, funContext.depth, funContext.locsSize, funContext.argsSize);
 		Frames.frames.put(funDecl, frame);
