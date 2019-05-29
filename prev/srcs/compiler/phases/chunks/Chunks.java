@@ -4,6 +4,7 @@
 package compiler.phases.chunks;
 
 import java.util.*;
+import compiler.data.asmcode.Code;
 import compiler.data.chunk.*;
 import compiler.data.imcode.ImcCONST;
 import compiler.data.imcode.ImcESTMT;
@@ -36,22 +37,13 @@ public class Chunks extends Phase {
 	}
 
 	public static void cleanChunks() {
-		// Check for consecutive labels
-		for(CodeChunk chunk : codeChunks) {
-			ImcStmt previous = null;
-			int addAt = -1;
-			for(ImcStmt stmt: chunk.stmts()) {
-				if(stmt instanceof ImcLABEL && previous instanceof ImcLABEL) {
-					addAt = chunk.stmts().indexOf(stmt);
-					break;
-				}
-				previous = stmt;
-			}
-			if(addAt != -1) {
-				chunk.realStmts().add(addAt,new ImcESTMT(new ImcCONST(0)));
-			}
-		}
-		
+		Vector<CodeChunk> chunks = new Vector<>();
+		for(CodeChunk codeChunk: codeChunks) {
+			BasicBlocks bb = new BasicBlocks(codeChunk);
+			chunks.add(bb.getChunk());
+		}		
+		codeChunks = chunks;
 	}
+	
 
 }
