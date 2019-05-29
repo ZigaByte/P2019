@@ -1,0 +1,39 @@
+typ string : ptr char;
+
+fun putInt(n:int):void;
+fun putChar(c:char):void;
+fun putString(s:ptr char):void;
+fun readString():string;
+fun readInt():int={
+	chars = readString();
+	
+	if(@chars == '-')then
+		negative = true;
+		chars = ((chars:int) + 8 : ptr char);
+	end;
+	
+	value = 0;
+	current = @chars;	
+	while((current:int) >= ('0':int) & (current:int) <= ('9':int)) do
+		value = value * 10 + ((current:int) - ('0':int));
+		chars = ((chars:int) + 8 : ptr char);
+		current = @chars;
+	end;
+	
+	if negative then
+		value = value * (-1);
+	end;
+	
+	:value
+	where 
+		var value:int;
+		var chars:string;
+		var current:char;
+		var negative:bool;
+};
+
+
+fun main():int = {
+	putInt(readInt());
+	:0
+};
