@@ -42,7 +42,8 @@ public class Wrapup extends Phase{
 				"D251	OCTA 0"); // Reserve some global registers
 		
 		writer.println("\n\n\tGREG @");
-		writer.println("_print	OCTA 0,0,0,0,0,0,0,0,0,0,0\r\n" + 
+		writer.println("InArgs	OCTA 0,64 % Input stored at first parameter, size is second parameter");
+		writer.println("PrintArgs	OCTA 0,0,0,0,0,0,0,0,0,0,0\r\n" + 
 				"		OCTA 0,0,0,0,0,0,0,0,0,0,0 % Print space");
 		
 		int size = 184;
@@ -176,7 +177,7 @@ public class Wrapup extends Phase{
 				"PI0	DIV $0,$0,10\r\n" + 
 				"	GET	$1,rR\r\n" + 
 				"	ADD $1,$1,48 $ Current digit in $1\r\n" + 
-				"	LDA $4,_print\r\n" + 
+				"	LDA $4,PrintArgs\r\n" + 
 				"	STO $1,$4,$2\r\n" + 
 				"	ADD $2,$2,8\r\n" + 
 				"	BNZ $0,PI0\r\n" + 
@@ -185,7 +186,7 @@ public class Wrapup extends Phase{
 				"	STO $1,$4,$2\r\n" + 
 				"	ADD $2,$2,8\r\n" + 
 				"PI2	SUB $2,$2,8\r\n" + 
-				"	LDA $255,_print\r\n" + 
+				"	LDA $255,PrintArgs\r\n" + 
 				"	ADD $255,$255,7\r\n" + 
 				"	ADD $255,$255,$2\r\n" + 
 				"	TRAP 0,Fputs,StdOut\r\n" + 
@@ -195,7 +196,7 @@ public class Wrapup extends Phase{
 		writer.println("_putChar	SET $0,$252\r\n" + 
 				"	ADD $0,$0,8\r\n" + 
 				"	LDO $0,$0,0\r\n" + 
-				"	LDA $255,_print\r\n" + 
+				"	LDA $255,PrintArgs\r\n" + 
 				"	STO $0,$255,0\r\n" + 
 				"	ADD $255,$255,7\r\n" + 
 				"	TRAP 0,Fputs,StdOut\r\n" + 
@@ -211,6 +212,60 @@ public class Wrapup extends Phase{
 				"	ADD $255,$0,$2\r\n" + 
 				"	LDO $1,$255,0\r\n" + 
 				"	BNZ $1,PS0\r\n" + 
+				"	POP");
+		writer.println("_readString	SET $0,0 \r\n" + 
+				"% - Prologue\r\n" + 
+				"	SET $0,$252\r\n" + 
+				"	SETL $2,8\r\n" + 
+				"	SUB $0,$0,$2\r\n" + 
+				"	STO $253,$0,0\r\n" + 
+				"	SUB $0,$0,8\r\n" + 
+				"	GET $1,rJ\r\n" + 
+				"	STO $1,$0,0\r\n" + 
+				"	SET $253,$252\r\n" + 
+				"	SETL $2,40\r\n" + 
+				"	SUB $252,$252,$2\r\n" + 
+				"	JMP RS2\r\n" + 
+				"\r\n" + 
+				"% - Body\r\n" + 
+				"RS2	SET $0,InArgs\r\n" + 
+				"	LDB $0,$0,0\r\n" + 
+				"	SET $1,0\r\n" + 
+				"	% While it is not 0, count size\r\n" + 
+				"	LDA $255,InArgs\r\n" + 
+				"	TRAP 0,Fgets,StdIn\r\n" + 
+				"\r\n" + 
+				"RS0	LDB $2,$0,$1\r\n" + 
+				"	ADD $1,$1,1\r\n" + 
+				"	BNZ $2,RS0\r\n" + 
+				"\r\n" + 
+				"	% Call new and get an array\r\n" + 
+				"	STO $2,$252,8\r\n" + 
+				"	STO $1,$252,0\r\n" + 
+				"	PUSHJ $16,_new\r\n" + 
+				"	LDO $3,$252,0 % $3 is the location of the array\r\n" + 
+				"	\r\n" + 
+				"	SET $1,0 %Put values into the array\r\n" + 
+				"RS3	LDB $2,$0,$1\r\n" + 
+				"	SET $4,$1\r\n" + 
+				"	MUL $4,$4,8\r\n" + 
+				"	STO $2,$3,$4\r\n" + 
+				"	ADD $1,$1,1\r\n" + 
+				"	BNZ $2,RS3\r\n" + 
+				"\r\n" + 
+				"	SET $0,$3\r\n" + 
+				"	JMP RS1\r\n" + 
+				"% - Epilogue\r\n" + 
+				"RS1	STO $0,$253,0\r\n" + 
+				"	SET $0,$253\r\n" + 
+				"	SETL $2,8\r\n" + 
+				"	SUB $0,$0,$2\r\n" + 
+				"	LDO $1,$0,0\r\n" + 
+				"	SET $252,$253\r\n" + 
+				"	SET $253,$1\r\n" + 
+				"	SUB $0,$0,8\r\n" + 
+				"	LDO $1,$0,0\r\n" + 
+				"	PUT rJ,$1\r\n" + 
 				"	POP");
 
 		writer.close();
