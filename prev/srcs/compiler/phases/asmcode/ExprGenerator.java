@@ -28,10 +28,17 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 	@Override
 	public Temp visit(ImcCONST constant, Vector<AsmInstr> visArg) {
 		Vector<Temp> defs = new Vector<>();
-		
 		defs.add(temp);
 		
+		boolean negative = false;
+		
+		
 		long value = constant.value;
+		if (value < 0) {
+			negative = true;
+			value = -value;
+		}
+		
 		long l = value & ((1<<16) - 1);
 		value >>= 16;
 		long ml = value & ((1<<16) - 1);
@@ -49,6 +56,10 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		if(h != 0)
 			visArg.add(new AsmOPER("INCH `s0," + h, defs, defs, null));
 
+		if(negative) {
+			visArg.add(new AsmOPER("NEG  `d0,`s0", defs, defs, null));
+		}
+		
 		return temp;
 	}
 	
@@ -66,7 +77,6 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		
 		uses.add(binOp.fstExpr.accept(this, visArg));
 		uses.add(binOp.sndExpr.accept(this, visArg));
-		
 		
 		String instr = "";
 		switch (binOp.oper) {
@@ -92,41 +102,51 @@ public class ExprGenerator implements ImcVisitor<Temp, Vector<AsmInstr>> {
 		case XOR:
 			instr = "XOR";
 			break;
-			
-		case EQU:
-			visArg.add(new AsmOPER("CMP `d0,`s0,`s1", uses, defs, null));
-			visArg.add(new AsmOPER("ADD `d0,`s0,1", defs, defs, null));
-			visArg.add(new AsmOPER("DIV `d0,`s0,2", defs, defs, null));
-			visArg.add(new AsmOPER("GET `d0,rR", null, defs, null));
-			return temp;
-		case LTH:{
-			Temp inst = uses.get(0);
-			uses.removeElementAt(0);
-			uses.insertElementAt(inst, 1);}
-		case GTH:
-			visArg.add(new AsmOPER("CMP `d0,`s0,`s1", uses, defs, null));
-			visArg.add(new AsmOPER("ADD `d0,`s0,1", defs, defs, null));
-			visArg.add(new AsmOPER("SR `d0,`s0,1", defs, defs, null));
-			return temp;
-		case LEQ:{
-			Temp inst = uses.get(0);
-			uses.removeElementAt(0);
-			uses.insertElementAt(inst, 1);}
-		case GEQ:
-			visArg.add(new AsmOPER("CMP `d0,`s0,`s1", uses, defs, null));
-			visArg.add(new AsmOPER("ADD `d0,`s0,2", defs, defs, null));
-			visArg.add(new AsmOPER("AND `d0,`s0,2", defs, defs, null));
-			visArg.add(new AsmOPER("SR `d0,`s0,1", defs, defs, null));
-			return temp;
-		case NEQ:
-			visArg.add(new AsmOPER("CMP `d0,`s0,`s1", uses, defs, null));
-			visArg.add(new AsmOPER("ADD `d0,`s0,2", defs, defs, null));
-			visArg.add(new AsmOPER("AND `d0,`s0,1", defs, defs, null));
-			return temp;
 		case MOD:
 			visArg.add(new AsmOPER("DIV `d0,`s0,`s1", uses, defs, null));
 			visArg.add(new AsmOPER("GET `d0,rR", null, defs, null));
 			return temp;
+			
+		default:{
+			// There is a compare
+			Vector<Temp> cmpDefs = new Vector<>();
+			cmpDefs.add(new Temp());
+			
+			visArg.add(new AsmOPER("CMP `d0,`s0,`s1", uses, cmpDefs, null));
+			
+			switch(binOp.oper) {
+			case EQU:
+				visArg.add(new AsmOPER("CSZ `d0,`s0,1", cmpDefs, defs, null));
+				visArg.add(new AsmOPER("CSNZ `d0,`s0,0", cmpDefs, defs, null));
+				break;
+			case NEQ:
+				visArg.add(new AsmOPER("CSZ `d0,`s0,0", cmpDefs, defs, null));
+				visArg.add(new AsmOPER("CSNZ `d0,`s0,1", cmpDefs, defs, null));
+				break;
+				
+			case LTH:
+				visArg.add(new AsmOPER("CSN `d0,`s0,1", cmpDefs, defs, null));
+				visArg.add(new AsmOPER("CSNN `d0,`s0,0", cmpDefs, defs, null));
+				break;
+			case GEQ:
+				visArg.add(new AsmOPER("CSN `d0,`s0,0", cmpDefs, defs, null));
+				visArg.add(new AsmOPER("CSNN `d0,`s0,1", cmpDefs, defs, null));
+				break;
+				
+			case GTH:
+				visArg.add(new AsmOPER("CSP `d0,`s0,1", cmpDefs, defs, null));
+				visArg.add(new AsmOPER("CSNP `d0,`s0,0", cmpDefs, defs, null));
+				break;
+			case LEQ:
+				visArg.add(new AsmOPER("CSP `d0,`s0,0", cmpDefs, defs, null));
+				visArg.add(new AsmOPER("CSNP `d0,`s0,1", cmpDefs, defs, null));
+				break;
+
+			default:
+				System.out.println("[ExprGen]" + binOp.oper + " does not exist");
+			}
+			return temp;
+			}
 		}
 		
 		visArg.add(new AsmOPER(instr + " `d0,`s0,`s1", uses, defs, null));
