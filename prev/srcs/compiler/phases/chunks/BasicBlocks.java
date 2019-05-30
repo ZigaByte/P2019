@@ -110,7 +110,6 @@ public class BasicBlocks {
 			}
 		}
 		
-		
 		Vector<Block> merged = new Vector<>();
 		while(blocks.size() > 0) {
 			Block currentBlock = blocks.get(0);
@@ -150,7 +149,6 @@ public class BasicBlocks {
 			}
 			
 			for(ImcStmt remove : toRemove) {
-				//System.out.println("Removed " + ((ImcLABEL)remove).label.name);
 				currentBlock.stmts.remove(remove);
 			}
 		}
@@ -164,8 +162,6 @@ public class BasicBlocks {
 
 
 	private void replaceLabel(Vector<ImcStmt> stmts, Label toReplace, Label replacement) {
-		//System.out.println(toReplace.name + " " + replacement.name);
-		//System.out.println("helo");
 		for(ImcStmt stmt : stmts) {
 			if(stmt instanceof ImcJUMP) {
 				if (((ImcJUMP)stmt).label == toReplace)
@@ -209,28 +205,19 @@ public class BasicBlocks {
 				}
 			} else if(currentBlock.start != null 
 					&& (currentStmt instanceof ImcJUMP || currentStmt instanceof ImcCJUMP)){
-				
-//				if(currentBlock.stmts.size() == 1 && currentStmt instanceof ImcJUMP) {
-//					// Replace this label with what we are jumping to and restart block
-//					replaceLabel(stmts, currentBlock.start, ((ImcJUMP)currentStmt).label);
-//					currentBlock = new Block();
-//				} else 
-				{
-					
-					if(currentStmt instanceof ImcJUMP) {
-						currentBlock.jump = ((ImcJUMP)currentStmt).label;
-					} else {
-						currentBlock.jump = ((ImcCJUMP)currentStmt).posLabel;	
-					}
-					currentBlock.stmts.add(currentStmt);
-					
-					blocks.add(currentBlock);				
-					currentBlock = new Block();
+				if(currentStmt instanceof ImcJUMP) {
+					currentBlock.jump = ((ImcJUMP)currentStmt).label;
+				} else {
+					currentBlock.jump = ((ImcCJUMP)currentStmt).posLabel;	
 				}
+				currentBlock.stmts.add(currentStmt);
+				
+				blocks.add(currentBlock);				
+				currentBlock = new Block();
 			} else if(currentBlock.start != null ) {
 				currentBlock.stmts.add(currentStmt);
 			} else{
-				System.out.println("test");
+				//System.out.println("test");
 				// Instruction not needed apparently
 			}
 		}
