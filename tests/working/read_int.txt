@@ -34,6 +34,29 @@ fun readInt():int={
 
 
 fun main():int = {
-	putInt(readInt());
+	a = readInt();
+	b = readInt();
+	
+	printOper('+', a+b);
+	printOper('-', a-b);
+	printOper('*', a*b);
+	printOper('/', a/b);
+	printOper('%', a%b);
+	
 	:0
+	where 
+		var a:int;
+		var b:int;	
+	fun printOper(oper:char, result:int):void={
+		putInt(a);
+		putChar(' ');
+		putChar(oper);
+		putChar(' ');
+		putInt(b);
+		putChar(' ');
+		putChar('=');
+		putChar(' ');
+		putInt(result);
+		putChar((10:char));
+		:none};
 };

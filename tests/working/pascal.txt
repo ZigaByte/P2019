@@ -4,8 +4,8 @@ fun putString(s:ptr char):void;
 
 fun main():int={
 	i = 0;
-	j = 0;
 	while i < 5 do
+		j = 0;
 		while j <= i do
 			putInt(pascal(j, i));
 			putChar(' ');
@@ -23,7 +23,7 @@ fun main():int={
 
 # k is the row, n is the column
 fun pascal(n:int, k:int):int={
-	if k == 0 | n == k then
+	if n == 0 | n == k then
 		r = 1;
 	else
 		if n < 0 | n > k then

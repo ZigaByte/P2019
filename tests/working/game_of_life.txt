@@ -45,14 +45,6 @@ fun create():void={
 		x = x + 1;
 	end;
 	
-		# Ten cell row
-	x = 15;
-	y = 9;
-	while x < 19 do
-		(@field[y])[x] = 1;
-		x = x + 1;
-	end;
-	
 	:none
 	where 
 		var x:int;
